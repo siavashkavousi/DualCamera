@@ -3,6 +3,7 @@ package com.siavash.dualcamera;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -33,6 +34,37 @@ public class IO {
             e.printStackTrace();
         }
 
+    }
+
+    public static void save(Context context, byte[] data, String url, int orientation){
+        long totalTime = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
+
+        File file = new File(context.getCacheDir(), url);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+        Log.d(TAG, "decodeByteArray: " + String.valueOf(System.currentTimeMillis() - time));
+
+        time = System.currentTimeMillis();
+        if (orientation != 0 && bitmap.getWidth() > bitmap.getHeight()) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(orientation);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            Log.d(TAG, "createBitmap: " + String.valueOf(System.currentTimeMillis() - time));
+        }
+        time = System.currentTimeMillis();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
+        Log.d(TAG, "compress: " + String.valueOf(System.currentTimeMillis() - time));
+
+        bitmap.recycle();
+
+        Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - totalTime));
     }
 
     @Nullable public static byte[] load(Context context, String url) {

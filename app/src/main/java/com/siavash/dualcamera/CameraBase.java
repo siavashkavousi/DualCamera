@@ -97,7 +97,7 @@ public abstract class CameraBase {
         @Override public void onPictureTaken(byte[] data, Camera camera) {
             Log.d(TAG, "onPictureTaken called! saving into file is about to start");
             if (mUrl.isEmpty()) return;
-            IO.save(mContext, data, mUrl);
+            IO.save(mContext, data, mUrl, Constants.DISPLAY_ORIENTATION);
 
             releaseCameraAndPreview();
             onPhotoSaved.onPhotoSavedComplete();

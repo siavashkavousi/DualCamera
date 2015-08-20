@@ -9,5 +9,6 @@ public class Constants {
 
     //region Camera Preview constants
     public static final int DISPLAY_ORIENTATION = 90;
+    public static final int COMPRESS_QUALITY = 100;
     //endregion
 }
