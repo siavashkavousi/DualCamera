@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.siavash.dualcamera.util.BitmapUtil;
+import com.siavash.dualcamera.util.Toolbar;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -21,16 +22,18 @@ import butterknife.ButterKnife;
  * Class for editing photos before saving into file
  * Created by sia on 8/18/15.
  */
-public class PhotoFragment extends Fragment {
+public class PhotoFragment extends Fragment implements Toolbar.OnClickListener {
     private static final String TAG = PhotoFragment.class.getSimpleName();
 
-    @Bind(R.id.photo_back) ImageView backPhoto;
-    @Bind(R.id.photo_front) ImageView frontPhoto;
+    @Bind(R.id.photo_back) ImageView mBackImageView;
+    @Bind(R.id.photo_front) ImageView mFrontImageView;
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "PhotoFragment onCreateView");
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         ButterKnife.bind(this, view);
+        // Set up toolbar
+        Toolbar toolbar = new Toolbar.Builder<>(this, R.id.toolbar, view).setTitle("ویرایش عکس").build();
 
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -38,24 +41,38 @@ public class PhotoFragment extends Fragment {
         int width = metrics.widthPixels, height = metrics.heightPixels;
 
         Bitmap backBitmap = BitmapUtil.decodeSampledBitmap(getActivity(), Constants.CAMERA_BACK_IMAGE_URL, width, height);
+        if (backBitmap == null) throw new NullPointerException("Back bitmap is null");
         Log.d(TAG, "back camera bitmap width: " + backBitmap.getWidth() + " and height: " + backBitmap.getHeight());
         Bitmap frontBitmap = BitmapUtil.decodeSampledBitmap(getActivity(), Constants.CAMERA_FRONT_IMAGE_URL, width / 4, height / 4);
+        if (frontBitmap == null) throw new NullPointerException("Front bitmap is null");
         Log.d(TAG, "front camera bitmap width: " + frontBitmap.getWidth() + " and height: " + frontBitmap.getHeight());
 
-        frontPhoto.setImageBitmap(frontBitmap);
-        backPhoto.setImageBitmap(backBitmap);
+        mFrontImageView.setImageBitmap(frontBitmap);
+        mBackImageView.setImageBitmap(backBitmap);
 
-
-
-        frontPhoto.setOnTouchListener(new OnTouchListener(backPhoto));
+        mFrontImageView.setOnTouchListener(new OnTouchListener(mBackImageView));
 
         return view;
+    }
+
+    private void saveFile(View view) {
+        view.setDrawingCacheEnabled(true);
+        Bitmap bitmap = view.getDrawingCache();
+        BitmapUtil.save(getActivity(), bitmap);
+    }
+
+    @Override public void nextButtonOnClick() {
+        saveFile(getView());
+    }
+
+    @Override public void backButtonOnClick() {
+
     }
 
     private class OnTouchListener implements View.OnTouchListener {
         private ImageView backgroundImage;
 
-        public OnTouchListener(ImageView backgroundImage){
+        public OnTouchListener(ImageView backgroundImage) {
             this.backgroundImage = backgroundImage;
         }
 
