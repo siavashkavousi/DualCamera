@@ -212,26 +212,30 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int height)
     {
         // Source: http://stackoverflow.com/questions/7942378/android-camera-will-not-work-startpreview-fails
+        final double ASPECT_TOLERANCE = 0.2;
+        double targetRatio = (double) width / height;
+        if (sizes == null) return null;
         Camera.Size optimalSize = null;
-
-        final double ASPECT_TOLERANCE = 0.1;
-        double targetRatio = (double) height / width;
-
-        // Try to find a size match which suits the whole screen minus the menu on the left.
-        for (Camera.Size size : sizes){
-
-            if (size.height != width) continue;
+        double minDiff = Double.MAX_VALUE;
+        // Try to find an size match aspect ratio and size
+        for (Camera.Size size : sizes) {
             double ratio = (double) size.width / size.height;
-            if (ratio <= targetRatio + ASPECT_TOLERANCE && ratio >= targetRatio - ASPECT_TOLERANCE){
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(size.height - height) < minDiff) {
                 optimalSize = size;
+                minDiff = Math.abs(size.height - height);
             }
         }
-
-        // If we cannot find the one that matches the aspect ratio, ignore the requirement.
+        // Cannot find the one match the aspect ratio, ignore the requirement
         if (optimalSize == null) {
-            // TODO : Backup in case we don't get a size.
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : sizes) {
+                if (Math.abs(size.height - height) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - height);
+                }
+            }
         }
-
         return optimalSize;
     }
 

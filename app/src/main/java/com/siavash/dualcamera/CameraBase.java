@@ -1,45 +1,33 @@
 package com.siavash.dualcamera;
 
-import android.content.Context;
+import android.app.Fragment;
 import android.hardware.Camera;
-import android.net.Uri;
-import android.os.Environment;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import rx.Observable;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import com.siavash.dualcamera.util.BitmapUtil;
 
 
 /**
+ * Parent class for camera controllers
  * Created by sia on 8/14/15.
  */
-public abstract class CameraBase {
+public abstract class CameraBase extends Fragment {
     private static final String TAG = CameraBase.class.getSimpleName();
     // Native camera.
     protected Camera mCamera;
     // View to display the camera output.
     protected CameraPreview mPreview;
-    // view's context
-    protected Context mContext;
-    protected CameraView mCameraView;
     // camera picture callback
     protected PictureCallback mPictureCallback;
     // picture url
     private String mUrl;
+    private String mFrontBack;
 
-    public CameraBase(CameraView cameraView, Context context) {
-        Log.d(TAG, "CameraBase is created");
-        mCameraView = cameraView;
-        mContext = context;
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "CameraBase onCreate method called");
         mPictureCallback = new PictureCallback();
     }
 
@@ -82,87 +70,37 @@ public abstract class CameraBase {
         }
     }
 
-    public void takePicture(String url) {
+    public void takePicture(String url, String frontBack) {
         mUrl = url;
+        mFrontBack = frontBack;
         mCamera.takePicture(null, null, mPictureCallback);
     }
 
+    @Override public void onDetach() {
+        releaseCameraAndPreview();
+        super.onDetach();
+    }
+
+    
+
     private class PictureCallback implements Camera.PictureCallback {
-        private OnPhotoSaved onPhotoSaved;
+        private OnCaptureListener mCallback;
 
         public PictureCallback() {
-            onPhotoSaved = mCameraView;
+            mCallback = (OnCaptureListener) getActivity();
         }
 
         @Override public void onPictureTaken(byte[] data, Camera camera) {
             Log.d(TAG, "onPictureTaken called! saving into file is about to start");
             if (mUrl.isEmpty()) return;
-            IO.save(mContext, data, mUrl, Constants.DISPLAY_ORIENTATION);
+            BitmapUtil.save(getActivity(), data, mUrl, Constants.DISPLAY_ORIENTATION);
 
             releaseCameraAndPreview();
-            onPhotoSaved.onPhotoSavedComplete();
+            mCallback.onCaptureComplete(mFrontBack);
         }
+    }
 
-        /**
-         * Used to return the camera File output.
-         *
-         * @return
-         */
-        private File getOutputMediaFile() {
-
-            File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES), "DualCamera");
-
-            if (!mediaStorageDir.exists()) {
-                if (!mediaStorageDir.mkdirs()) {
-                    Log.d(TAG, "Required media storage does not exist");
-                    return null;
-                }
-            }
-
-            // Create a media file name
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            File mediaFile;
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_" + timeStamp + ".jpg");
-
-            Toast.makeText(mContext, "Your picture has been saved!", Toast.LENGTH_LONG).show();
-
-            return mediaFile;
-        }
-
-        private File getTempFile(Context context, String url) {
-            File file = null;
-            try {
-                String fileName = Uri.parse(url).getLastPathSegment();
-                file = File.createTempFile(fileName, null, context.getCacheDir());
-                Log.d(TAG, "file name : " + fileName + " and file : " + file);
-            } catch (IOException e) {
-                // Error while creating file
-            }
-            return file;
-        }
-
-        private void asyncSavePhoto(final byte[] data) {
-            Observable.just(new Action1<Void>() {
-                @Override public void call(Void aVoid) {
-                    if (mUrl.isEmpty()) return;
-//                    File pictureFile = getTempFile(mContext, mUrl);
-                    File pictureFile = getOutputMediaFile();
-                    if (pictureFile == null) {
-                        Toast.makeText(mContext, "Image retrieval failed.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    try {
-                        FileOutputStream fos = new FileOutputStream(pictureFile);
-                        fos.write(data);
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).subscribeOn(Schedulers.newThread());
-        }
+    public interface OnCaptureListener {
+        void onCaptureComplete(String frontBack);
     }
 }
