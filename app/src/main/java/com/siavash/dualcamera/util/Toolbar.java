@@ -1,8 +1,10 @@
 package com.siavash.dualcamera.util;
 
-import android.app.Fragment;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,70 +18,45 @@ import butterknife.ButterKnife;
  * Customized toolbar
  * Created by sia on 8/26/15.
  */
-public class Toolbar implements View.OnClickListener {
+public class Toolbar extends RelativeLayout implements View.OnClickListener {
 
-    @Bind(R.id.title) TextView mTextViewTitle;
-    @Bind(R.id.back_btn) ImageButton mBackButton;
-    @Bind(R.id.next_btn) ImageButton mNextButton;
-
-    private String mTitle;
-    private int mNextButtonResource, mBackButtonResource;
-    private Bitmap mNextButtonImage, mBackButtonImage;
+    @Bind(R.id.title) TextView titleTextView;
+    @Bind(R.id.back_btn) ImageButton backButton;
+    @Bind(R.id.next_btn) ImageButton nextButton;
 
     private OnClickListener mCallback;
 
-    private Toolbar(Builder builder) {
-        if (builder.parent instanceof Fragment) {
-            RelativeLayout layout = (RelativeLayout) builder.view.findViewById(builder.resLayoutId);
-            ButterKnife.bind(this, layout);
-        } else {
-            throw new ClassCastException("Toolbar parent is not an instance of fragment");
-        }
+    public Toolbar(Context context, Builder builder) {
+        super(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.toolbar, this, true);
+        ButterKnife.bind(this, view);
 
         mCallback = (OnClickListener) builder.parent;
+        nextButton.setOnClickListener(this);
+        backButton.setOnClickListener(this);
 
-        mTitle = builder.title;
-        mNextButtonResource = builder.nextButtonResource;
-        mBackButtonResource = builder.backButtonResource;
-        mNextButtonImage = builder.nextButtonImage;
-        mBackButtonImage = builder.backButtonImage;
-        setText();
-        setNextButtonResource();
-        setBackButtonResource();
-        setNextButtonImage();
-        setBackButtonImage();
-    }
+        if (builder.title != null) titleTextView.setText(builder.title);
+        if (builder.backButtonImage != null) backButton.setImageBitmap(builder.backButtonImage);
+        if (builder.nextButtonImage != null) nextButton.setImageBitmap(builder.nextButtonImage);
+        if (builder.backButtonResource != 0)
+            backButton.setImageResource(builder.backButtonResource);
+        if (builder.nextButtonResource != 0)
+            nextButton.setImageResource(builder.nextButtonResource);
 
-    private void setText() {
-        if (mTitle != null)
-            mTextViewTitle.setText(mTitle);
-    }
-
-    private void setNextButtonResource() {
-        if (mNextButtonResource != 0)
-            mNextButton.setImageResource(mNextButtonResource);
-    }
-
-    private void setBackButtonResource() {
-        if (mBackButtonResource != 0)
-            mBackButton.setImageResource(mBackButtonResource);
-    }
-
-    private void setNextButtonImage() {
-        if (mNextButtonImage != null)
-            mNextButton.setImageBitmap(mNextButtonImage);
-    }
-
-    private void setBackButtonImage() {
-        if (mBackButtonImage != null)
-            mBackButton.setImageBitmap(mBackButtonImage);
+        if (builder.attachedToParent) {
+            FrameLayout layout = (FrameLayout) builder.view;
+            layout.addView(this);
+            layout.requestLayout();
+        }
     }
 
     @Override public void onClick(View v) {
         int id = v.getId();
-        if (id == mNextButton.getId()) {
+        if (id == nextButton.getId()) {
             mCallback.nextButtonOnClick();
-        } else if (id == mBackButton.getId()) {
+        } else if (id == backButton.getId()) {
             mCallback.backButtonOnClick();
         }
     }
@@ -91,24 +68,26 @@ public class Toolbar implements View.OnClickListener {
     }
 
     public static class Builder<T> {
-        private T parent;
+        private Context context;
         private View view;
-        private int resLayoutId;
+        private boolean attachedToParent;
+        private T parent;
         private String title;
         private int nextButtonResource, backButtonResource;
         private Bitmap nextButtonImage, backButtonImage;
 
-        public Builder(T parent, int resLayoutId, View view) {
-            this.parent = parent;
-            this.resLayoutId = resLayoutId;
+        public Builder(Context context, T parent, View view, boolean attachedToParent) {
+            this.context = context;
+            this.attachedToParent = attachedToParent;
             this.view = view;
+            this.parent = parent;
         }
 
         public String getTitle() {
             return title;
         }
 
-        public Builder setTitle(String title) {
+        public Builder<T> setTitle(String title) {
             this.title = title;
             return this;
         }
@@ -117,7 +96,7 @@ public class Toolbar implements View.OnClickListener {
             return nextButtonResource;
         }
 
-        public Builder setNextButtonResource(int nextButtonResource) {
+        public Builder<T> setNextButtonResource(int nextButtonResource) {
             this.nextButtonResource = nextButtonResource;
             return this;
         }
@@ -126,7 +105,7 @@ public class Toolbar implements View.OnClickListener {
             return backButtonResource;
         }
 
-        public Builder setBackButtonResource(int backButtonResource) {
+        public Builder<T> setBackButtonResource(int backButtonResource) {
             this.backButtonResource = backButtonResource;
             return this;
         }
@@ -135,7 +114,7 @@ public class Toolbar implements View.OnClickListener {
             return nextButtonImage;
         }
 
-        public Builder setNextButtonImage(Bitmap nextButtonImage) {
+        public Builder<T> setNextButtonImage(Bitmap nextButtonImage) {
             this.nextButtonImage = nextButtonImage;
             return this;
         }
@@ -144,13 +123,40 @@ public class Toolbar implements View.OnClickListener {
             return backButtonImage;
         }
 
-        public Builder setBackButtonImage(Bitmap backButtonImage) {
+        public Builder<T> setBackButtonImage(Bitmap backButtonImage) {
             this.backButtonImage = backButtonImage;
             return this;
         }
 
+        public boolean isAttachedToParent() {
+            return attachedToParent;
+        }
+
+        public Builder<T> setAttachedToParent(boolean attachedToParent) {
+            this.attachedToParent = attachedToParent;
+            return this;
+        }
+
+        public View getParentView() {
+            return view;
+        }
+
+        public Builder<T> setParentView(View parentView) {
+            view = parentView;
+            return this;
+        }
+
+        public T getParent(){
+            return parent;
+        }
+
+        public Builder<T> setParent(T parent){
+            this.parent = parent;
+            return this;
+        }
+
         public Toolbar build() {
-            return new Toolbar(this);
+            return new Toolbar(context, this);
         }
     }
 }

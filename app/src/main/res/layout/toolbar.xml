@@ -1,5 +1,6 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/toolbar_layout"
+<RelativeLayout android:id="@+id/toolbar_layout"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/toolbar_height"
                 android:layout_alignParentLeft="true"
@@ -19,7 +20,8 @@
         android:maxHeight="24dp"
         android:maxWidth="24dp"
         android:padding="12dp"
-        android:src="@drawable/next" />
+        android:src="@drawable/next"
+        tools:ignore="contentDescription"/>
 
     <View
         android:id="@+id/view1"
@@ -28,7 +30,7 @@
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/back_btn"
         android:layout_toStartOf="@+id/back_btn"
-        android:background="@android:color/holo_blue_dark" />
+        android:background="@android:color/holo_blue_dark"/>
 
     <com.siavash.dualcamera.util.CustomTextView
         android:id="@+id/title"
@@ -41,7 +43,7 @@
         android:layout_marginRight="20dp"
         android:text="@string/app_name"
         android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        android:textSize="20sp"/>
 
     <View
         android:id="@+id/view2"
@@ -50,7 +52,7 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/next_btn"
         android:layout_toRightOf="@id/next_btn"
-        android:background="@android:color/holo_blue_dark" />
+        android:background="@android:color/holo_blue_dark"/>
 
     <ImageButton
         android:id="@+id/next_btn"
@@ -64,6 +66,7 @@
         android:maxHeight="24dp"
         android:maxWidth="24dp"
         android:padding="12dp"
-        android:src="@drawable/previous_active" />
+        android:src="@drawable/previous_active"
+        tools:ignore="contentDescription"/>
 
 </RelativeLayout>

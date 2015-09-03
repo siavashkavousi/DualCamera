@@ -22,7 +22,7 @@ public class CustomTextView extends TextView {
 
     public CustomTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setUpFont(context, 5);
+        setUpFont(context, 0);
     }
 
     private void setUpFont(Context context, int index){
