@@ -6,35 +6,39 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements CameraBase.OnCaptureListener {
+
+    private PhotoFragment mPhotoFragment;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        CameraFront cameraFront = new CameraFront();
-        PhotoFragment photoFragment = new PhotoFragment();
-        switchFragment(R.id.container, photoFragment);
+        mPhotoFragment = new PhotoFragment();
+
+        CameraBase cameraFront = new CameraFront(mPhotoFragment);
+        switchFragment(Constants.CONTAINER_RES_ID, cameraFront, Constants.FRONT_CAMERA_FRAGMENT);
     }
 
-    private void switchFragment(int resId, Fragment fragment) {
+    public void switchFragment(int resId, Fragment fragment, String tag) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_in_right);
-        transaction.replace(resId, fragment);
-        transaction.addToBackStack(null);
+//        transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_in_right, R.anim.slide_in_right, R.anim.slide_out_right);
+        transaction.replace(resId, fragment, tag);
         transaction.commit();
     }
 
     @Override public void onCaptureComplete(String frontBack) {
         switch (frontBack) {
             case Constants.CAMERA_FRONT:
-                CameraBase cameraBack = new CameraBack();
-                switchFragment(R.id.container, cameraBack);
+                CameraBase cameraBack = new CameraBack(mPhotoFragment);
+                switchFragment(Constants.CONTAINER_RES_ID, cameraBack, Constants.BACK_CAMERA_FRAGMENT);
                 break;
             case Constants.CAMERA_BACK:
-                PhotoFragment photoFragment = new PhotoFragment();
-                switchFragment(R.id.container, photoFragment);
+                switchFragment(Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT);
                 break;
             default:
                 // nothing

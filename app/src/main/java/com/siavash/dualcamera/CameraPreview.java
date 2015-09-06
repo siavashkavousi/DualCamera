@@ -1,14 +1,15 @@
 package com.siavash.dualcamera;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.hardware.Camera;
-import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.Display;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
  * Surface on which the camera projects it's capture results. This is derived from Google's docs
  */
 class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-
+    private static final String TAG = CameraPreview.class.getSimpleName();
     // SurfaceHolder
     private SurfaceHolder mHolder;
     // Our Camera.
@@ -143,101 +144,119 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     /**
-     * Calculate the measurements of the layout
-     *
-     * @param widthMeasureSpec
-     * @param heightMeasureSpec
-     */
-    @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
-        // Source: http://stackoverflow.com/questions/7942378/android-camera-will-not-work-startpreview-fails
-        final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
-        final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
-        setMeasuredDimension(width, height);
-
-        if (mSupportedPreviewSizes != null){
-            mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
-        }
-    }
-
-    /**
      * Update the layout based on rotation and orientation changes.
      *
      * @param changed
-     * @param left
-     * @param top
-     * @param right
-     * @param bottom
      */
-    @Override protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (changed) {
-            final int width = right - left;
-            final int height = bottom - top;
+    @Override protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        if (changed && mCameraLayout.getChildCount() > 0) {
+            final View child = mCameraLayout.getChildAt(0);
+
+            final int width = r - l;
+            final int height = b - t;
 
             int previewWidth = width;
             int previewHeight = height;
-
             if (mPreviewSize != null) {
-                Display display = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-
-                switch (display.getRotation()) {
-                    case Surface.ROTATION_0:
-                        previewWidth = mPreviewSize.height;
-                        previewHeight = mPreviewSize.width;
-                        /// FIXME: 8/18/15
-                        mCamera.setDisplayOrientation(90);
-                        break;
-                    case Surface.ROTATION_90:
-                        previewWidth = mPreviewSize.width;
-                        previewHeight = mPreviewSize.height;
-                        break;
-                    case Surface.ROTATION_180:
-                        previewWidth = mPreviewSize.height;
-                        previewHeight = mPreviewSize.width;
-                        break;
-                    case Surface.ROTATION_270:
-                        previewWidth = mPreviewSize.width;
-                        previewHeight = mPreviewSize.height;
-                        //// FIXME: 8/18/15
-                        mCamera.setDisplayOrientation(180);
-                        break;
-                }
+                previewWidth = mPreviewSize.width;
+                previewHeight = mPreviewSize.height;
+            }
+            if (previewWidth == 0) {
+                previewWidth = 1;
+            }
+            if (previewHeight == 0) {
+                previewHeight = 1;
             }
 
-            final int scaledChildHeight = previewHeight * width / previewWidth;
-            mCameraLayout.layout(0, height - scaledChildHeight, width, height);
+            // Center the child SurfaceView within the parent.
+            if (width * previewHeight > height * previewWidth) {
+                final int scaledChildWidth = previewWidth * height / previewHeight;
+                child.layout((width - scaledChildWidth) / 2, 0, (width + scaledChildWidth) / 2, height);
+            } else {
+                final int scaledChildHeight = previewHeight * width / previewWidth;
+                child.layout(0, (height - scaledChildHeight) / 2, width, (height + scaledChildHeight) / 2);
+            }
         }
     }
 
-    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int height)
-    {
-        // Source: http://stackoverflow.com/questions/7942378/android-camera-will-not-work-startpreview-fails
-        final double ASPECT_TOLERANCE = 0.2;
-        double targetRatio = (double) width / height;
+    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes) {
+        final double ASPECT_TOLERANCE = 0.05;
         if (sizes == null) return null;
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
-        // Try to find an size match aspect ratio and size
+        Point displaySize = new Point();
+        Activity activity = (Activity) mContext;
+        {
+            Display display = activity.getWindowManager().getDefaultDisplay();
+            display.getSize(displaySize);
+            Log.d(TAG, "display size: " + displaySize.x + "," + displaySize.y);
+        }
+        double targetRatio = (double) displaySize.x / (double) displaySize.y;
+        int targetHeight = Math.min(displaySize.y, displaySize.x);
+        if (targetHeight <= 0) {
+            targetHeight = displaySize.y;
+        }
+        // Try to find the size which matches the aspect ratio, and is closest match to display height
         for (Camera.Size size : sizes) {
+            Log.d(TAG, "supported preview size: " + size.width + "," + size.height);
             double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
-            if (Math.abs(size.height - height) < minDiff) {
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
                 optimalSize = size;
-                minDiff = Math.abs(size.height - height);
+                minDiff = Math.abs(size.height - targetHeight);
             }
         }
-        // Cannot find the one match the aspect ratio, ignore the requirement
         if (optimalSize == null) {
-            minDiff = Double.MAX_VALUE;
-            for (Camera.Size size : sizes) {
-                if (Math.abs(size.height - height) < minDiff) {
-                    optimalSize = size;
-                    minDiff = Math.abs(size.height - height);
-                }
+            // can't find match for aspect ratio, so find closest one
+            Log.d(TAG, "no preview size matches the aspect ratio");
+            optimalSize = getClosestSize(sizes, targetRatio);
+        }
+        Log.d(TAG, "chosen optimalSize: " + optimalSize.width + " x " + optimalSize.height);
+        Log.d(TAG, "optimal size ratio: " + ((double) optimalSize.width / optimalSize.height));
+        return optimalSize;
+    }
+
+    private Camera.Size getClosestSize(List<Camera.Size> sizes, double targetRatio) {
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(ratio - targetRatio);
             }
         }
         return optimalSize;
     }
+
+//    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int height) {
+//        final double ASPECT_TOLERANCE = 0.05;
+//        double targetRatio = (double) width / height;
+//        if (sizes == null) return null;
+//        Camera.Size optimalSize = null;
+//        double minDiff = Double.MAX_VALUE;
+//        // Try to find an size match aspect ratio and size
+//        for (Camera.Size size : sizes) {
+//            double ratio = (double) size.width / size.height;
+//            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+//            if (Math.abs(size.height - height) < minDiff) {
+//                optimalSize = size;
+//                minDiff = Math.abs(size.height - height);
+//            }
+//        }
+//        // Cannot find the one match the aspect ratio, ignore the requirement
+//        if (optimalSize == null) {
+//            minDiff = Double.MAX_VALUE;
+//            for (Camera.Size size : sizes) {
+//                if (Math.abs(size.height - height) < minDiff) {
+//                    optimalSize = size;
+//                    minDiff = Math.abs(size.height - height);
+//                }
+//            }
+//        }
+//        return optimalSize;
+//    }
 
     public Camera getCamera() {
         return mCamera;

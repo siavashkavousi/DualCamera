@@ -1,7 +1,6 @@
 package com.siavash.dualcamera.util;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -10,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.siavash.dualcamera.ApplicationBase;
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
 
@@ -23,6 +21,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import rx.Observable;
+
 /**
  * Utility for saving, loading, rotating, resizing and ... of bitmaps
  * Created by sia on 8/18/15.
@@ -33,7 +33,7 @@ public class BitmapUtil {
     public static void save(Context context, Bitmap bitmap){
         File pictureFile = getOutputMediaFile(context);
         if (pictureFile == null){
-            Toast.makeText(context, context.getResources().getString(R.string.save_photo_failed), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Image retrieval failed.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -52,10 +52,9 @@ public class BitmapUtil {
      * method to generate a unique name for output file
      * @return camera output file
      */
-    @Nullable private static File getOutputMediaFile(Context context) {
-
+    private static File getOutputMediaFile(Context context) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), context.getResources().getString(R.string.app_name));
+                Environment.DIRECTORY_PICTURES), "DualCamera");
 
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
@@ -69,17 +68,18 @@ public class BitmapUtil {
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                 "IMG_" + timeStamp + ".jpg");
 
-        Toast.makeText(context, context.getResources().getString(R.string.save_photo), Toast.LENGTH_LONG).show();
+//        Toast.makeText(context, context.getResources().getString(R.string.save_photo), Toast.LENGTH_LONG).show();
 
         return mediaFile;
     }
 
 
-    public static void save(byte[] data, String url, int orientation){
+    public static void save(Context context, byte[] data, String url, int orientation){
         long totalTime = System.currentTimeMillis();
         long time = System.currentTimeMillis();
 
-        File file = new File(ApplicationBase.getAppContext().getCacheDir(), url);
+//        File file = getOutputMediaFile(null);
+        File file = new File(context.getCacheDir(), url);
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -110,8 +110,8 @@ public class BitmapUtil {
         Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - totalTime));
     }
 
-    @Nullable public static byte[] load(String url) {
-        File file = new File(ApplicationBase.getAppContext().getCacheDir(), url);
+    @Nullable public static byte[] load(Context context, String url) {
+        File file = new File(context.getCacheDir(), url);
         try {
             FileInputStream fis = new FileInputStream(file);
             ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
@@ -127,8 +127,8 @@ public class BitmapUtil {
         return null;
     }
 
-    @Nullable public static Bitmap decodeBitmap(String url, BitmapFactory.Options options){
-        File file = new File(ApplicationBase.getAppContext().getCacheDir(), url);
+    @Nullable public static Bitmap decodeBitmap(Context context, String url, BitmapFactory.Options options){
+        File file = new File(context.getCacheDir(), url);
         try {
             FileInputStream fis = new FileInputStream(file);
             return BitmapFactory.decodeStream(fis, null, options);
@@ -138,12 +138,12 @@ public class BitmapUtil {
         return null;
     }
 
-    @Nullable public static Bitmap decodeSampledBitmap(String url, int reqWidth, int reqHeight) {
+    @Nullable public static Bitmap decodeSampledBitmap(Context context, String url, int reqWidth, int reqHeight) {
         long time = System.currentTimeMillis();
         // first decode check the raw image dimensions
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        decodeBitmap(url, options);
+        decodeBitmap(context, url, options);
 
         // calculate the factor to scale down by depending on the desired height
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -156,7 +156,7 @@ public class BitmapUtil {
         time = System.currentTimeMillis() - time;
         Log.i(TAG, "complexity time of decoding bitmap is: " + time);
 
-        return decodeBitmap(url, options);
+        return decodeBitmap(context, url, options);
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -173,10 +173,6 @@ public class BitmapUtil {
             // choose the smallest factor to scale down by, so the scaled image is always slightly larger than needed
             inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
         }
-
-        Log.i(TAG, "calculateInSampleSize: imageHeight = " + imageHeight + " imageWidth = " + imageWidth
-                + " reqWidth = " + reqWidth + " reqHeight = " + reqHeight
-                + " inSampleSize = " + inSampleSize);
 
         return inSampleSize;
     }

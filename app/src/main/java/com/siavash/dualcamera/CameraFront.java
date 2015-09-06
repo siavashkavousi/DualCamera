@@ -1,5 +1,6 @@
 package com.siavash.dualcamera;
 
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -18,13 +19,16 @@ import butterknife.OnClick;
 public class CameraFront extends CameraBase {
     private static final String TAG = CameraFront.class.getSimpleName();
 
-    private static final int CAMERA_ID = 1;
+    private static final int CAMERA_ID = Camera.CameraInfo.CAMERA_FACING_FRONT;
     @Bind(R.id.camera_container) FrameLayout mFrameLayout;
+
+    public CameraFront(PhotoFragment photoFragment) {
+        super(photoFragment);
+    }
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_camera, container, false);
         ButterKnife.bind(this, view);
-
         safeCameraOpenInView(mFrameLayout);
         return view;
     }

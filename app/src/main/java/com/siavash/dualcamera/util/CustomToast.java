@@ -39,7 +39,7 @@ public class CustomToast extends Toast {
 
     private void setUpCustomToast(CharSequence message) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.toast_layout, null);
+        View view = inflater.inflate(R.layout.layout_toast, null);
 
         TextView text = (TextView) view.findViewById(R.id.message);
         text.setText(message);

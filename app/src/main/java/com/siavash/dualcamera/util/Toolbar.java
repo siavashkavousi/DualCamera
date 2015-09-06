@@ -30,7 +30,7 @@ public class Toolbar extends RelativeLayout implements View.OnClickListener {
         super(context);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.toolbar, this, true);
+        View view = inflater.inflate(R.layout.layout_toolbar, this, true);
         ButterKnife.bind(this, view);
 
         mCallback = (OnClickListener) builder.parent;
@@ -146,11 +146,11 @@ public class Toolbar extends RelativeLayout implements View.OnClickListener {
             return this;
         }
 
-        public T getParent(){
+        public T getParent() {
             return parent;
         }
 
-        public Builder<T> setParent(T parent){
+        public Builder<T> setParent(T parent) {
             this.parent = parent;
             return this;
         }
