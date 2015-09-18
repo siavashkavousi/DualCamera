@@ -48,6 +48,6 @@ public class CameraBack extends CameraBase {
     }
 
     @OnClick(R.id.shutter_btn) void shutterOnClick() {
-        takePicture(Constants.CAMERA_BACK_IMAGE_URL, Constants.CAMERA_BACK);
+        takePicture(Constants.CAMERA_BACK_IMAGE_URL, Constants.PHOTO_FRAGMENT);
     }
 }

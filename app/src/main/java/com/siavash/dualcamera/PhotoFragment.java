@@ -1,7 +1,7 @@
 package com.siavash.dualcamera;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -14,70 +14,78 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.siavash.dualcamera.util.BitmapUtil;
 import com.siavash.dualcamera.util.Toolbar;
 
+import java.io.File;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import rx.Observer;
 
 /**
- * Class for editing photos before saving into file
+ * Editing photos before saving into file or sharing with others
  * Created by sia on 8/18/15.
  */
 public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, Observer {
     private static final String TAG = PhotoFragment.class.getSimpleName();
+    private static PhotoFragment sPhotoFragment;
 
-    @Bind(R.id.photo_layout) RelativeLayout mPhotoLayout;
-    @Bind(R.id.photo_back) ImageView mBackImageView;
-    @Bind(R.id.photo_front) ImageView mFrontImageView;
+    @Bind(R.id.toolbar) Toolbar<PhotoFragment> toolbar;
+    @Bind(R.id.photo_layout) RelativeLayout photoLayout;
+    @Bind(R.id.photo_back) ImageView backImageView;
+    @Bind(R.id.photo_front) ImageView frontImageView;
+    @Bind(R.id.save_and_share) Button saveAndShare;
 
+    private OnFragmentChange mCallback;
+    private ProgressDialog progressDialog;
     private int mWidth, mHeight;
-    private boolean mSavedFrontBitmap, mSavedBackBitmap;
+    private String mImageUrl;
+
+    private PhotoFragment() {
+    }
+
+    public static PhotoFragment getInstance() {
+        if (sPhotoFragment == null) {
+            sPhotoFragment = new PhotoFragment();
+        }
+        return sPhotoFragment;
+    }
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "PhotoFragment onCreateView");
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         ButterKnife.bind(this, view);
         // Set up toolbar
-        Toolbar.Builder<PhotoFragment> builder = new Toolbar.Builder<>(getActivity(), this, view, true);
-        builder.build();
+        toolbar.setCallback(this);
+        toolbar.setTitle("ویرایش عکس");
+
+        mCallback = (OnFragmentChange) getActivity();
 
         final DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
         mWidth = metrics.widthPixels;
         mHeight = metrics.heightPixels;
-        mSavedFrontBitmap = false;
-        mSavedBackBitmap = false;
+        // Save and share button on click listener
+        saveAndShare.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                saveFile(photoLayout);
+                mCallback.switchFragmentTo(Constants.SHARE_FRAGMENT, mImageUrl);
+            }
+        });
+
+        progressDialog = ProgressDialog.show(getActivity(), "در حال بارگذاری", "دو دقه توش نگه دار", true);
 
         return view;
     }
 
-    private void saveFile(View view) {
-        view.setDrawingCacheEnabled(true);
-        Bitmap bitmap = view.getDrawingCache();
-        BitmapUtil.save(getActivity(), bitmap);
-    }
-
-    @Override public void nextButtonOnClick() {
-        saveFile(getView());
-    }
-
-    @Override public void backButtonOnClick() {
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(Constants.CONTAINER_RES_ID, new CameraFront(this), Constants.FRONT_CAMERA_FRAGMENT).commit();
-    }
-
     @Override public void onCompleted() {
-        if (CameraBase.sFrontBack.equals(Constants.CAMERA_BACK)) {
-            mSavedBackBitmap = true;
+        if (CameraBase.sFrontBack == Constants.PHOTO_FRAGMENT) {
             setUpImageView();
-        } else if (CameraBase.sFrontBack.equals(Constants.CAMERA_FRONT)) {
-            mSavedFrontBitmap = true;
         }
     }
 
@@ -97,29 +105,36 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
         if (backBitmap == null) throw new NullPointerException("Back bitmap is null");
         Log.d(TAG, "back camera bitmap width: " + backBitmap.getWidth() + " and height: " + backBitmap.getHeight());
 
-        mFrontImageView.post(new Runnable() {
+        frontImageView.post(new Runnable() {
             @Override public void run() {
-                mFrontImageView.setY(200);
-                mFrontImageView.setImageBitmap(frontBitmap);
+                frontImageView.setY(200);
+                frontImageView.setImageBitmap(frontBitmap);
             }
         });
-        mBackImageView.post(new Runnable() {
+        backImageView.post(new Runnable() {
             @Override public void run() {
-                mBackImageView.setImageBitmap(backBitmap);
+                backImageView.setImageBitmap(backBitmap);
             }
         });
 
+        progressDialog.dismiss();
 
-//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mBackImageView.getLayoutParams();
-//        layoutParams.width = backBitmap.getWidth();
-//        layoutParams.height = backBitmap.getHeight();
-//        mBackImageView.setLayoutParams(layoutParams);
         int[] location = new int[2];
-        mBackImageView.getLocationOnScreen(location);
-        Log.d(TAG, location[0] + " " + location[1] + " " + mBackImageView.getWidth() + " " + mBackImageView.getHeight()
-                + " " + mBackImageView.getTop() + " " + mBackImageView.getBottom() + " " + mBackImageView.getLeft()
-                + " " + mBackImageView.getRight());
-        mFrontImageView.setOnTouchListener(new OnTouchListener(mBackImageView));
+        backImageView.getLocationOnScreen(location);
+        Log.d(TAG, location[0] + " " + location[1] + " " + backImageView.getWidth() + " " + backImageView.getHeight()
+                + " " + backImageView.getTop() + " " + backImageView.getBottom() + " " + backImageView.getLeft()
+                + " " + backImageView.getRight());
+        frontImageView.setOnTouchListener(new OnTouchListener(backImageView));
+    }
+
+    private void saveFile(View view) {
+        view.setDrawingCacheEnabled(true);
+        Bitmap bitmap = view.getDrawingCache();
+        mImageUrl = BitmapUtil.save(getActivity(), bitmap, BitmapUtil.getOutputMediaFile(getActivity()), null);
+    }
+
+    @Override public void onClick() {
+        mCallback.switchFragmentTo(Constants.CAMERA_FRONT_FRAGMENT);
     }
 
     private class OnTouchListener implements View.OnTouchListener {
@@ -138,12 +153,18 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
         // Remember some things for zooming
         private PointF startPoint = new PointF();
         private PointF mid = new PointF();
+        // fields to limit movement of the front camera image
         private ImageView backgroundImageView;
+        private int centerX, centerY;
+        private float dx, dy, dz, dw, x, y, z, w;
 
         private OnTouchListener(ImageView backgroundImageView) {
             matrix = new Matrix();
             savedMatrix = new Matrix();
             this.backgroundImageView = backgroundImageView;
+
+            centerX = mWidth / 2;
+            centerY = mHeight / 2;
         }
 
         public boolean onTouch(View v, MotionEvent event) {
@@ -152,9 +173,16 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
 
             dumpEvent(event);
 
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+
             // Handle touch events here...
             switch (event.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
+                    dx = event.getRawX() - layoutParams.leftMargin;
+                    dy = event.getRawY() - layoutParams.topMargin;
+                    dz = event.getRawX() - layoutParams.bottomMargin;
+                    dw = event.getRawX() - layoutParams.rightMargin;
+
                     savedMatrix.set(matrix);
                     startPoint.set(event.getX(), event.getY());
                     mode = DRAG;
@@ -180,13 +208,18 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
                     lastEvent = null;
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    int[] loca = new int[2];
-                    v.getLocationOnScreen(loca);
-                    Log.d(TAG, "location: " + loca[0] + "    " + loca[1]);
                     if (mode == DRAG) {
                         matrix.set(savedMatrix);
-                        v.setTranslationX(event.getRawX() - startPoint.x);
-                        v.setTranslationY(event.getRawY() - startPoint.y);
+
+                        x = event.getRawX();
+                        y = event.getRawY();
+
+                        layoutParams.leftMargin = (int) (x - dx);
+                        layoutParams.topMargin = (int) (y - dy);
+                        layoutParams.bottomMargin = (int) (z - dz);
+                        layoutParams.rightMargin = (int) (w - dw);
+
+                        view.setLayoutParams(layoutParams);
                     } else if (mode == ZOOM && event.getPointerCount() == 2) {
                         float newDistance = spacing(event);
                         matrix.set(savedMatrix);

@@ -48,6 +48,6 @@ public class CameraFront extends CameraBase {
     }
 
     @OnClick(R.id.shutter_btn) void shutterOnClick() {
-        takePicture(Constants.CAMERA_FRONT_IMAGE_URL, Constants.CAMERA_FRONT);
+        takePicture(Constants.CAMERA_FRONT_IMAGE_URL, Constants.CAMERA_BACK_FRAGMENT);
     }
 }

@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.siavash.dualcamera.ApplicationBase;
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
 
@@ -18,10 +19,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.schedulers.Schedulers;
 
 /**
  * Utility for saving, loading, rotating, resizing and ... of bitmaps
@@ -30,29 +36,49 @@ import rx.Observable;
 public class BitmapUtil {
     private static final String TAG = BitmapUtil.class.getSimpleName();
 
-    public static void save(Context context, Bitmap bitmap){
-        File pictureFile = getOutputMediaFile(context);
-        if (pictureFile == null){
+    /**
+     * Saves bitmap into storage
+     *
+     * @param context    context of the related activity
+     * @param bitmap     target bitmap
+     * @param targetFile target file in order to save bitmap into it
+     * @return absolute path to the saved bitmap
+     */
+    @Nullable public static <T extends Observer> String save(Context context, final Bitmap bitmap, final File targetFile, T observer) {
+        if (targetFile == null) {
             Toast.makeText(context, "Image retrieval failed.", Toast.LENGTH_SHORT).show();
-            return;
+            return null;
         }
+        Observable observable = Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override public void call(Subscriber<? super Void> subscriber) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(targetFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(pictureFile);
-        } catch (IOException e) {
-            e.printStackTrace();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
+            }
+        });
+
+        Subscription subscription;
+        if (observer !=null){
+            subscription = observable.subscribe(observer);
+        } else {
+            subscription = observable.subscribe();
         }
+        ApplicationBase.getRefWatcher(context).watch(subscription);
 
-        bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
-        bitmap.recycle();
+        return targetFile.getAbsolutePath();
     }
 
     /**
      * method to generate a unique name for output file
+     *
      * @return camera output file
      */
-    private static File getOutputMediaFile(Context context) {
+    @Nullable public static File getOutputMediaFile(Context context) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "DualCamera");
 
@@ -68,46 +94,57 @@ public class BitmapUtil {
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                 "IMG_" + timeStamp + ".jpg");
 
-//        Toast.makeText(context, context.getResources().getString(R.string.save_photo), Toast.LENGTH_LONG).show();
+        Toast.makeText(context, context.getResources().getString(R.string.save_photo), Toast.LENGTH_LONG).show();
 
         return mediaFile;
     }
 
+    /**
+     * save photo in cache folder of app asynchronously
+     *
+     * @param context     context need to access cache folder
+     * @param data        to be saved
+     * @param url         place to save in cache folder
+     * @param orientation orientation of the taken photo
+     */
+    public static <T extends Observer> void save(Context context, final byte[] data, String url, final int orientation, T observer) {
+        final long time = System.currentTimeMillis();
 
-    public static void save(Context context, byte[] data, String url, int orientation){
-        long totalTime = System.currentTimeMillis();
-        long time = System.currentTimeMillis();
+        final File file = new File(context.getCacheDir(), url);
+        Observable observable = Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override public void call(Subscriber<? super Void> subscriber) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(file);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
 
-//        File file = getOutputMediaFile(null);
-        File file = new File(context.getCacheDir(), url);
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-        Log.d(TAG, "decodeByteArray: " + String.valueOf(System.currentTimeMillis() - time));
-
-        time = System.currentTimeMillis();
-        if (orientation != 0) {
-            Matrix matrix = new Matrix();
-            if (bitmap.getWidth() > bitmap.getHeight()) {
-                matrix.postRotate(orientation);
-            } else {
-                matrix.postRotate(-orientation);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                if (orientation != 0) {
+                    Matrix matrix = new Matrix();
+                    if (bitmap.getWidth() > bitmap.getHeight()) {
+                        matrix.postRotate(orientation);
+                    } else {
+                        matrix.postRotate(-orientation);
+                    }
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                }
+                bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
+                bitmap.recycle();
+                if (Constants.isDebug) Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
+                subscriber.onCompleted();
             }
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            Log.d(TAG, "createBitmap: " + String.valueOf(System.currentTimeMillis() - time));
+        }).subscribeOn(Schedulers.computation());
+
+        Subscription subscription;
+        if (observer != null){
+            subscription = observable.subscribe(observer);
+        } else {
+            subscription = observable.subscribe();
         }
-        time = System.currentTimeMillis();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
-        Log.d(TAG, "compress: " + String.valueOf(System.currentTimeMillis() - time));
 
-        bitmap.recycle();
-
-        Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - totalTime));
+        ApplicationBase.getRefWatcher(context).watch(subscription);
     }
 
     @Nullable public static byte[] load(Context context, String url) {
@@ -127,7 +164,7 @@ public class BitmapUtil {
         return null;
     }
 
-    @Nullable public static Bitmap decodeBitmap(Context context, String url, BitmapFactory.Options options){
+    @Nullable public static Bitmap decodeBitmap(Context context, String url, BitmapFactory.Options options) {
         File file = new File(context.getCacheDir(), url);
         try {
             FileInputStream fis = new FileInputStream(file);
@@ -175,5 +212,26 @@ public class BitmapUtil {
         }
 
         return inSampleSize;
+    }
+
+    public static void copy(final File src, final File dst) throws IOException {
+        Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override public void call(Subscriber<? super Void> subscriber) {
+                try {
+                    long time = System.currentTimeMillis();
+                    FileInputStream inStream = new FileInputStream(src);
+                    FileOutputStream outStream = new FileOutputStream(dst);
+                    FileChannel inChannel = inStream.getChannel();
+                    FileChannel outChannel = outStream.getChannel();
+                    inChannel.transferTo(0, inChannel.size(), outChannel);
+                    inStream.close();
+                    outStream.close();
+                    if (Constants.isDebug)
+                        Log.d(TAG, "Time to copy: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).subscribeOn(Schedulers.computation()).subscribe();
     }
 }

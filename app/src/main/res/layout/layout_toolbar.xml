@@ -45,28 +45,4 @@
         android:textColor="@android:color/white"
         android:textSize="20sp"/>
 
-    <View
-        android:id="@+id/view2"
-        android:layout_width="2dp"
-        android:layout_height="48dp"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/next_btn"
-        android:layout_toRightOf="@id/next_btn"
-        android:background="@android:color/holo_blue_dark"/>
-
-    <ImageButton
-        android:id="@+id/next_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginStart="4dp"
-        android:background="@null"
-        android:maxHeight="24dp"
-        android:maxWidth="24dp"
-        android:padding="12dp"
-        android:src="@drawable/ic_back"
-        tools:ignore="contentDescription"/>
-
 </RelativeLayout>

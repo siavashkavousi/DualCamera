@@ -1,14 +1,14 @@
 package com.siavash.dualcamera;
 
-import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.siavash.dualcamera.util.FragmentUtil;
+
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements CameraBase.OnCaptureListener {
+public class MainActivity extends AppCompatActivity implements OnFragmentChange {
 
     private PhotoFragment mPhotoFragment;
 
@@ -17,31 +17,29 @@ public class MainActivity extends AppCompatActivity implements CameraBase.OnCapt
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mPhotoFragment = new PhotoFragment();
+        mPhotoFragment = PhotoFragment.getInstance();
 
         CameraBase cameraFront = new CameraFront(mPhotoFragment);
-        switchFragment(Constants.CONTAINER_RES_ID, cameraFront, Constants.FRONT_CAMERA_FRAGMENT);
+        FragmentUtil.switchFragment(getFragmentManager(), Constants.CONTAINER_RES_ID, cameraFront);
     }
 
-    public void switchFragment(int resId, Fragment fragment, String tag) {
+    @Override public void switchFragmentTo(int index, String... optionalValues) {
         FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//        transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_in_right, R.anim.slide_in_right, R.anim.slide_out_right);
-        transaction.replace(resId, fragment, tag);
-        transaction.commit();
-    }
-
-    @Override public void onCaptureComplete(String frontBack) {
-        switch (frontBack) {
-            case Constants.CAMERA_FRONT:
+        switch (index) {
+            case Constants.CAMERA_FRONT_FRAGMENT:
+                CameraBase cameraFront = new CameraFront(mPhotoFragment);
+                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraFront);
+                break;
+            case Constants.CAMERA_BACK_FRAGMENT:
                 CameraBase cameraBack = new CameraBack(mPhotoFragment);
-                switchFragment(Constants.CONTAINER_RES_ID, cameraBack, Constants.BACK_CAMERA_FRAGMENT);
+                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraBack);
                 break;
-            case Constants.CAMERA_BACK:
-                switchFragment(Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT);
+            case Constants.PHOTO_FRAGMENT:
+                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment);
                 break;
-            default:
-                // nothing
+            case Constants.SHARE_FRAGMENT:
+                ShareFragment shareFragment = ShareFragment.newInstance(optionalValues[0]);
+                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, shareFragment);
                 break;
         }
     }

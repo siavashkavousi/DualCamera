@@ -11,11 +11,6 @@ import com.siavash.dualcamera.util.BitmapUtil;
 
 import java.lang.ref.WeakReference;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.schedulers.Schedulers;
-
 
 /**
  * Parent class for camera controllers
@@ -23,7 +18,7 @@ import rx.schedulers.Schedulers;
  */
 public abstract class CameraBase extends Fragment {
     private static final String TAG = CameraBase.class.getSimpleName();
-    public static String sFrontBack;
+    public static int sFrontBack;
     // picture url
     private static String mUrl;
     // Native camera.
@@ -35,7 +30,7 @@ public abstract class CameraBase extends Fragment {
     // photo fragment instance in order to observe saving image bitmaps
     private PhotoFragment mPhotoFragment;
 
-    public CameraBase(PhotoFragment photoFragment){
+    public CameraBase(PhotoFragment photoFragment) {
         mPhotoFragment = photoFragment;
     }
 
@@ -84,7 +79,7 @@ public abstract class CameraBase extends Fragment {
         }
     }
 
-    public void takePicture(String url, String frontBack) {
+    public void takePicture(String url, int frontBack) {
         mUrl = url;
         sFrontBack = frontBack;
         mCamera.takePicture(null, null, mPictureCallback);
@@ -95,39 +90,27 @@ public abstract class CameraBase extends Fragment {
         super.onDetach();
     }
 
-    public interface OnCaptureListener {
-        void onCaptureComplete(String frontBack);
-    }
-
     private static class PictureCallback implements Camera.PictureCallback {
-        private final WeakReference<Activity> mActivity;
-        private final WeakReference<PhotoFragment> mPhotoFragment;
-        private OnCaptureListener mCallback;
+        private WeakReference<Activity> mActivity;
+        private WeakReference<PhotoFragment> mPhotoFragment;
+        private OnFragmentChange mCallback;
 
         public PictureCallback(Activity activity, PhotoFragment photoFragment) {
             mActivity = new WeakReference<>(activity);
             mPhotoFragment = new WeakReference<>(photoFragment);
             try {
-                mCallback = (OnCaptureListener) mActivity.get();
+                mCallback = (OnFragmentChange) mActivity.get();
             } catch (ClassCastException e) {
                 throw new ClassCastException(mActivity.get().toString() + " must implement OnCaptureListener");
             }
         }
 
-        @Override public void onPictureTaken(final byte[] data, final Camera camera) {
+        @Override public void onPictureTaken(byte[] data, Camera camera) {
             Log.d(TAG, "onPictureTaken called! saving into file is about to start");
             if (mUrl.isEmpty()) return;
 
-            Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
-                @Override public void call(Subscriber<? super Void> subscriber) {
-                    BitmapUtil.save(mActivity.get(), data, mUrl, Constants.DISPLAY_ORIENTATION);
-                    Log.d(TAG, Thread.currentThread().toString());
-                    subscriber.onCompleted();
-                }
-            }).subscribeOn(Schedulers.computation()).subscribe(mPhotoFragment.get());
-            ApplicationBase.getRefWatcher(mActivity.get()).watch(subscription);
-
-            mCallback.onCaptureComplete(sFrontBack);
+            BitmapUtil.save(mActivity.get(), data, mUrl, Constants.DISPLAY_ORIENTATION, mPhotoFragment.get());
+            mCallback.switchFragmentTo(sFrontBack);
         }
     }
 }

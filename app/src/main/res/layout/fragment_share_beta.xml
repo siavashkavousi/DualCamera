@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/parent_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.siavash.dualcamera.util.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_medium"/>
+
+        <ImageView
+            android:id="@+id/photo_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="contentDescription"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/space_medium"
+            android:layout_marginLeft="@dimen/space_medium"
+            android:layout_marginRight="@dimen/space_medium"
+            android:layout_marginStart="@dimen/space_medium"
+            android:layout_marginTop="@dimen/space_medium">
+
+            <com.siavash.dualcamera.util.CustomTextView
+                android:id="@+id/share_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="@dimen/space_low"
+                android:text="@string/shareContent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="@dimen/text_size_xlarge"/>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/share_to"
+                android:alignmentMode="alignBounds"
+                android:columnCount="2"
+                android:useDefaultMargins="true"
+                >
+
+                <Button
+                    android:id="@+id/facebook"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="@dimen/share_btn_width"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_facebook"
+                    android:drawablePadding="@dimen/space_low"
+                    android:drawableStart="@drawable/ic_facebook"
+                    android:text="@string/facebook"
+                    android:layout_gravity="center"
+                    android:layout_row="0"
+                    android:layout_column="0"/>
+
+                <Button
+                    android:id="@+id/instagram"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="@dimen/share_btn_width"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:drawableLeft="@drawable/ic_instagram"
+                    android:drawablePadding="@dimen/space_low"
+                    android:drawableStart="@drawable/ic_instagram"
+                    android:text="@string/instagram"
+                    android:layout_row="0"
+                    android:layout_column="1"/>
+
+                <Button
+                    android:id="@+id/whatsapp"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="@dimen/share_btn_width"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_whatsapp"
+                    android:drawablePadding="@dimen/space_low"
+                    android:drawableStart="@drawable/ic_whatsapp"
+                    android:layout_gravity="center"
+                    android:text="@string/twitter"
+                    android:layout_row="1"
+                    android:layout_column="0"/>
+
+                <Button
+                    android:id="@+id/telegram"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="@dimen/share_btn_width"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_telegram"
+                    android:drawableStart="@drawable/ic_telegram"
+                    android:text="@string/telegram"
+                    android:layout_gravity="center"
+                    android:layout_row="1"
+                    android:layout_column="1"/>
+
+            </GridLayout>
+
+            <!--<View-->
+            <!--android:id="@+id/view1"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="2dp"-->
+            <!--android:layout_below="@+id/share_to"-->
+            <!--android:background="@color/grey_light"/>-->
+
+            <!--<Button-->
+            <!--android:id="@+id/facebook"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignLeft="@+id/view2"-->
+            <!--android:layout_alignStart="@+id/view2"-->
+            <!--android:layout_alignTop="@+id/view1"-->
+            <!--android:drawableLeft="@drawable/ic_facebook"-->
+            <!--android:drawablePadding="@dimen/space_low"-->
+            <!--android:drawableStart="@drawable/ic_facebook"-->
+            <!--android:text="@string/facebook"/>-->
+
+            <!--<View-->
+            <!--android:id="@+id/view"-->
+            <!--android:layout_width="2dp"-->
+            <!--android:layout_height="70dp"-->
+            <!--android:layout_alignTop="@+id/view1"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:layout_marginTop="2dp"-->
+            <!--android:background="@color/grey"/>-->
+
+            <!--<Button-->
+            <!--android:id="@+id/whatsapp"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignEnd="@+id/view2"-->
+            <!--android:layout_alignRight="@+id/view2"-->
+            <!--android:layout_below="@+id/share_to"-->
+            <!--android:drawableLeft="@drawable/ic_whatsapp"-->
+            <!--android:drawablePadding="@dimen/space_low"-->
+            <!--android:drawableStart="@drawable/ic_whatsapp"-->
+            <!--android:text="@string/twitter"/>-->
+
+            <!--<View-->
+            <!--android:id="@+id/view2"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="2dp"-->
+            <!--android:layout_below="@+id/whatsapp"-->
+            <!--android:layout_marginEnd="@dimen/space_medium"-->
+            <!--android:layout_marginLeft="@dimen/space_medium"-->
+            <!--android:layout_marginRight="@dimen/space_medium"-->
+            <!--android:layout_marginStart="@dimen/space_medium"-->
+            <!--android:background="@color/grey"/>-->
+
+            <!--<View-->
+            <!--android:layout_width="2dp"-->
+            <!--android:layout_height="50dp"-->
+            <!--android:layout_alignBottom="@+id/instagram"-->
+            <!--android:layout_alignEnd="@+id/view"-->
+            <!--android:layout_alignRight="@+id/view"-->
+            <!--android:layout_alignTop="@+id/view2"-->
+            <!--android:layout_marginTop="2dp"-->
+            <!--android:background="@color/grey"/>-->
+
+            <!--<Button-->
+            <!--android:id="@+id/telegram"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignLeft="@+id/whatsapp"-->
+            <!--android:layout_alignStart="@+id/whatsapp"-->
+            <!--android:layout_below="@+id/whatsapp"-->
+            <!--android:drawableLeft="@drawable/ic_telegram"-->
+            <!--android:drawableStart="@drawable/ic_telegram"-->
+            <!--android:text="@string/telegram"/>-->
+
+            <!--<Button-->
+            <!--android:id="@+id/instagram"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignLeft="@+id/facebook"-->
+            <!--android:layout_alignStart="@+id/facebook"-->
+            <!--android:layout_below="@+id/facebook"-->
+            <!--android:drawableLeft="@drawable/ic_instagram"-->
+            <!--android:drawablePadding="@dimen/space_low"-->
+            <!--android:drawableStart="@drawable/ic_instagram"-->
+            <!--android:text="@string/instagram"/>-->
+
+            <!--<View-->
+            <!--android:id="@+id/view3"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="2dp"-->
+            <!--android:layout_below="@+id/telegram"-->
+            <!--android:layout_marginEnd="@dimen/space_medium"-->
+            <!--android:layout_marginLeft="@dimen/space_medium"-->
+            <!--android:layout_marginRight="@dimen/space_medium"-->
+            <!--android:layout_marginStart="@dimen/space_medium"-->
+            <!--android:background="@color/grey"/>-->
+        </RelativeLayout>
+
+    </LinearLayout>
+</ScrollView>

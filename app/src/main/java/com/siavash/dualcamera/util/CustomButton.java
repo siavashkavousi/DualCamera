@@ -3,19 +3,17 @@ package com.siavash.dualcamera.util;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.widget.TextView;
-
-import com.siavash.dualcamera.util.StringUtil;
+import android.widget.Button;
 
 /**
- * Custom Text View with default Persian typeface
- * Created by sia on 8/26/15.
+ * Custom Button with default Persian typeface
+ * Created by sia on 9/19/15.
  */
-public class CustomTextView extends TextView {
+public class CustomButton extends Button {
 
-    public CustomTextView(Context context, AttributeSet attrs) {
+    public CustomButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setUpFont(context, StringUtil.FONT_AFSANEH);
+        setUpFont(context, StringUtil.FONT_NAZANIN_BOLD);
     }
 
     public void setUpFont(Context context, String fontName){
