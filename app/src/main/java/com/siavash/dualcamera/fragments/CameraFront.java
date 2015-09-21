@@ -1,4 +1,4 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.fragments;
 
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -7,6 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import com.siavash.dualcamera.control.CameraPreview;
+import com.siavash.dualcamera.Constants;
+import com.siavash.dualcamera.R;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

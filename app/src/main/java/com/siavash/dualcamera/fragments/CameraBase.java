@@ -1,4 +1,4 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.siavash.dualcamera.control.CameraPreview;
+import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.util.BitmapUtil;
 
 import java.lang.ref.WeakReference;

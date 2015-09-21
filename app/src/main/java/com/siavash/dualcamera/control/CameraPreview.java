@@ -1,4 +1,4 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.control;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,13 +11,15 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.siavash.dualcamera.Constants;
+
 import java.io.IOException;
 import java.util.List;
 
 /**
  * Surface on which the camera projects it's capture results. This is derived from Google's docs
  */
-class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getSimpleName();
     // SurfaceHolder
     private SurfaceHolder mHolder;

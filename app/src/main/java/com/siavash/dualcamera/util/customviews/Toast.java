@@ -1,4 +1,4 @@
-package com.siavash.dualcamera.util;
+package com.siavash.dualcamera.util.customviews;
 
 import android.app.Activity;
 import android.app.Application;
@@ -8,7 +8,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.siavash.dualcamera.R;
 
@@ -16,7 +15,7 @@ import com.siavash.dualcamera.R;
  * Custom Toast with default Persian typeface
  * Created by sia on 9/1/15.
  */
-public class CustomToast extends Toast {
+public class Toast extends android.widget.Toast {
 
     private Context mContext;
 
@@ -27,14 +26,14 @@ public class CustomToast extends Toast {
      * @param context The context to use.  Usually your {@link Application}
      *                or {@link Activity} object.
      */
-    private CustomToast(Context context, CharSequence message) {
+    private Toast(Context context, CharSequence message) {
         super(context);
         mContext = context;
         setUpCustomToast(message);
     }
 
-    @NonNull public static Toast makeText(Context context, CharSequence text) {
-        return new CustomToast(context, text);
+    @NonNull public static android.widget.Toast makeText(Context context, CharSequence text) {
+        return new Toast(context, text);
     }
 
     private void setUpCustomToast(CharSequence message) {
@@ -45,7 +44,7 @@ public class CustomToast extends Toast {
         text.setText(message);
 
         setGravity(Gravity.BOTTOM, 0, 0);
-        setDuration(Toast.LENGTH_LONG);
+        setDuration(android.widget.Toast.LENGTH_LONG);
         setView(view);
     }
 }

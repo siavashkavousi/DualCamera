@@ -1,4 +1,4 @@
-package com.siavash.dualcamera.util;
+package com.siavash.dualcamera.util.customviews;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -9,9 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.siavash.dualcamera.R;
+import com.siavash.dualcamera.util.StringUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -24,8 +24,10 @@ public class Toolbar<T> extends RelativeLayout implements View.OnClickListener {
 
     @Bind(R.id.title) TextView title;
     @Bind(R.id.back_btn) ImageButton backButton;
+    @Bind(R.id.action_btn) Button actionButton;
 
-    private OnClickListener mCallback;
+    private OnBackClickListener mBackCallback;
+    private OnActionClickListener mActionCallback;
 
     public Toolbar(Context context) {
         super(context);
@@ -60,7 +62,10 @@ public class Toolbar<T> extends RelativeLayout implements View.OnClickListener {
     }
 
     public void setCallback(T callback) {
-        mCallback = (OnClickListener) callback;
+        if (backButton.getVisibility() == View.VISIBLE)
+            mBackCallback = (OnBackClickListener) callback;
+        if (actionButton.getVisibility() == View.VISIBLE)
+            mActionCallback = (OnActionClickListener) callback;
     }
 
     public void setRightButtonResource(int resId) {
@@ -71,14 +76,34 @@ public class Toolbar<T> extends RelativeLayout implements View.OnClickListener {
         backButton.setImageBitmap(bitmap);
     }
 
+    public void setActionButtonText(String text){
+        actionButton.setText(text);
+        actionButton.setUpFont(getContext(), StringUtil.FONT_AFSANEH);
+    }
+
+    public void setActionButtonVisibility(int visibility) {
+        actionButton.setVisibility(visibility);
+        setActionButtonCallback();
+    }
+
+    private void setActionButtonCallback() {
+        actionButton.setOnClickListener(this);
+    }
+
     @Override public void onClick(View v) {
         int id = v.getId();
         if (id == backButton.getId()) {
-            mCallback.onClick();
+            mBackCallback.goBack();
+        } else if (id == actionButton.getId()) {
+            mActionCallback.doAction();
         }
     }
 
-    public interface OnClickListener {
-        void onClick();
+    public interface OnBackClickListener {
+        void goBack();
+    }
+
+    public interface OnActionClickListener {
+        void doAction();
     }
 }

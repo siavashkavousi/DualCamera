@@ -1,5 +1,6 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,14 +16,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.siavash.dualcamera.Constants;
+import com.siavash.dualcamera.R;
 import com.siavash.dualcamera.util.BitmapUtil;
-import com.siavash.dualcamera.util.CustomTextView;
-import com.siavash.dualcamera.util.CustomToast;
+import com.siavash.dualcamera.util.customviews.TextView;
+import com.siavash.dualcamera.util.customviews.Toast;
 import com.siavash.dualcamera.util.StringUtil;
-import com.siavash.dualcamera.util.Toolbar;
+import com.siavash.dualcamera.util.customviews.Toolbar;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import butterknife.Bind;
@@ -32,22 +34,22 @@ import butterknife.ButterKnife;
  * Share or save photos to file
  * Created by siavash on 3/6/2015.
  */
-public class ShareFragment extends Fragment implements Toolbar.OnClickListener{
+public class ShareFragment extends Fragment implements Toolbar.OnBackClickListener, Toolbar.OnActionClickListener {
 
     private static final String TAG = ShareFragment.class.getSimpleName();
 
     @Bind(R.id.toolbar) Toolbar<ShareFragment> toolbar;
     @Bind({R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram}) List<Button> socialNetworks;
-    @Bind(R.id.share_to) CustomTextView shareTextView;
+    @Bind(R.id.share_to) TextView shareTextView;
     @Bind(R.id.photo_container) ImageView image;
 
     private OnFragmentChange mCallback;
     private String mImageUrl;
 
-    private ShareFragment(){
+    private ShareFragment() {
     }
 
-    public static ShareFragment newInstance(String imageUrl){
+    public static ShareFragment newInstance(String imageUrl) {
         ShareFragment shareFragment = new ShareFragment();
         Bundle args = new Bundle();
         args.putString(Constants.IMAGE_URL, imageUrl);
@@ -55,14 +57,17 @@ public class ShareFragment extends Fragment implements Toolbar.OnClickListener{
         return shareFragment;
     }
 
-    @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_share_beta, container, false);
-        ButterKnife.bind(this, view);
-        // Set up toolbar
-        toolbar.setTitle("اشتراک گذاری");
+    @Override public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback = (OnFragmentChange) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnFragmentChange");
+        }
+    }
 
-        mCallback = (OnFragmentChange) getActivity();
-
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -70,8 +75,18 @@ public class ShareFragment extends Fragment implements Toolbar.OnClickListener{
         int imageHeight = metrics.heightPixels;
 
         mImageUrl = getArguments().getString(Constants.IMAGE_URL);
-        Bitmap bitmap = BitmapUtil.decodeSampledBitmap(getActivity(), mImageUrl, imageWidth, imageHeight);
+        Bitmap bitmap = BitmapUtil.decodeSampledBitmap(mImageUrl, imageWidth, imageHeight);
         image.setImageBitmap(bitmap);
+    }
+
+    @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_share, container, false);
+        ButterKnife.bind(this, view);
+        // Set up toolbar
+        toolbar.setTitle("اشتراک گذاری");
+        toolbar.setActionButtonVisibility(View.VISIBLE);
+        toolbar.setActionButtonText("ذخیره");
+        toolbar.setCallback(this);
 
         shareTextView.setUpFont(getActivity(), StringUtil.FONT_IRAN_NASTALIQ);
 
@@ -110,12 +125,17 @@ public class ShareFragment extends Fragment implements Toolbar.OnClickListener{
 
         if (resolved) startActivity(prototype);
         else {
-            CustomToast.makeText(getActivity(), "تو که " + appNameInPersian + " رو نصب نداری! ");
+            Toast.makeText(getActivity(), "تو که " + appNameInPersian + " رو نصب نداری! ");
         }
     }
 
-    @Override public void onClick() {
-        mCallback.switchFragmentTo(Constants.PHOTO_FRAGMENT);
+    @Override public void goBack() {
+        getActivity().onBackPressed();
+    }
+
+
+    @Override public void doAction() {
+        BitmapUtil.copy(new File(mImageUrl), BitmapUtil.setImageFile());
     }
 
     private class OnClickListener implements View.OnClickListener {

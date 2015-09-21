@@ -3,13 +3,20 @@ package com.siavash.dualcamera;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
+import com.siavash.dualcamera.fragments.CameraBack;
+import com.siavash.dualcamera.fragments.CameraBase;
+import com.siavash.dualcamera.fragments.CameraFront;
+import com.siavash.dualcamera.fragments.OnFragmentChange;
+import com.siavash.dualcamera.fragments.PhotoFragment;
+import com.siavash.dualcamera.fragments.ShareFragment;
 import com.siavash.dualcamera.util.FragmentUtil;
 
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements OnFragmentChange {
-
+    private static final String TAG = MainActivity.class.getSimpleName();
     private PhotoFragment mPhotoFragment;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentChange 
         mPhotoFragment = PhotoFragment.getInstance();
 
         CameraBase cameraFront = new CameraFront(mPhotoFragment);
-        FragmentUtil.switchFragment(getFragmentManager(), Constants.CONTAINER_RES_ID, cameraFront);
+        FragmentUtil.replaceFragment(getFragmentManager(), Constants.CONTAINER_RES_ID, cameraFront);
     }
 
     @Override public void switchFragmentTo(int index, String... optionalValues) {
@@ -28,19 +35,30 @@ public class MainActivity extends AppCompatActivity implements OnFragmentChange 
         switch (index) {
             case Constants.CAMERA_FRONT_FRAGMENT:
                 CameraBase cameraFront = new CameraFront(mPhotoFragment);
-                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraFront);
+                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraFront);
                 break;
             case Constants.CAMERA_BACK_FRAGMENT:
                 CameraBase cameraBack = new CameraBack(mPhotoFragment);
-                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraBack);
+                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraBack);
                 break;
             case Constants.PHOTO_FRAGMENT:
-                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment);
+                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment);
                 break;
             case Constants.SHARE_FRAGMENT:
                 ShareFragment shareFragment = ShareFragment.newInstance(optionalValues[0]);
-                FragmentUtil.switchFragment(fragmentManager, Constants.CONTAINER_RES_ID, shareFragment);
+                FragmentUtil.addFragment(fragmentManager, Constants.CONTAINER_RES_ID, shareFragment);
                 break;
+        }
+    }
+
+    @Override public void onBackPressed() {
+        FragmentManager fragmentManager = getFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 0){
+            Log.d(TAG, "popping back stack");
+            fragmentManager.popBackStack();
+        } else {
+            Log.d(TAG, "nothing on back stack, calling super");
+            super.onBackPressed();
         }
     }
 }

@@ -5,15 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.siavash.dualcamera.ApplicationBase;
 import com.siavash.dualcamera.Constants;
-import com.siavash.dualcamera.R;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +35,52 @@ import rx.schedulers.Schedulers;
  */
 public class BitmapUtil {
     private static final String TAG = BitmapUtil.class.getSimpleName();
+
+    @NonNull public static File getFile(String url) {
+        File file = new File(url);
+        if (!file.exists())
+            throw new NullPointerException("requested file does not exist in the underlying system");
+        return file;
+    }
+
+    @NonNull public static File getCacheFile(Context context, String url) {
+        File file = new File(context.getCacheDir(), url);
+        if (!file.exists())
+            throw new NullPointerException("requested file does not exist in the underlying system");
+        return file;
+    }
+
+    @Nullable public static File setImageFile() {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String name = "IMG_" + timeStamp + ".jpg";
+        return setFile(name);
+    }
+
+    @Nullable public static File setFile(String name) {
+        File imageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "DualCamera");
+
+        if (!imageDir.exists()) {
+            if (!imageDir.mkdirs()) {
+                Log.d(TAG, "Required media storage does not exist");
+                return null;
+            }
+        }
+
+        return new File(imageDir.getPath() + File.separator + name + ".jpg");
+    }
+
+    public static String save(Context context, View view) {
+        view.setDrawingCacheEnabled(true);
+        Bitmap bitmap = view.getDrawingCache();
+        String imageUrl = BitmapUtil.save(context, bitmap, BitmapUtil.setFile(Constants.IMAGE_URL));
+        view.setDrawingCacheEnabled(false);
+        return imageUrl;
+    }
+
+    @Nullable public static String save(Context context, final Bitmap bitmap, final File targetFile) {
+        return save(context, bitmap, targetFile, null);
+    }
 
     /**
      * Saves bitmap into storage
@@ -63,7 +109,7 @@ public class BitmapUtil {
         });
 
         Subscription subscription;
-        if (observer !=null){
+        if (observer != null) {
             subscription = observable.subscribe(observer);
         } else {
             subscription = observable.subscribe();
@@ -73,30 +119,8 @@ public class BitmapUtil {
         return targetFile.getAbsolutePath();
     }
 
-    /**
-     * method to generate a unique name for output file
-     *
-     * @return camera output file
-     */
-    @Nullable public static File getOutputMediaFile(Context context) {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "DualCamera");
-
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d(TAG, "Required media storage does not exist");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                "IMG_" + timeStamp + ".jpg");
-
-        Toast.makeText(context, context.getResources().getString(R.string.save_photo), Toast.LENGTH_LONG).show();
-
-        return mediaFile;
+    public static void save(Context context, byte[] data, String url, int orientation) {
+        save(context, data, url, orientation, null);
     }
 
     /**
@@ -132,13 +156,14 @@ public class BitmapUtil {
                 }
                 bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
                 bitmap.recycle();
-                if (Constants.isDebug) Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
+                if (Constants.isDebug)
+                    Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
                 subscriber.onCompleted();
             }
         }).subscribeOn(Schedulers.computation());
 
         Subscription subscription;
-        if (observer != null){
+        if (observer != null) {
             subscription = observable.subscribe(observer);
         } else {
             subscription = observable.subscribe();
@@ -147,25 +172,7 @@ public class BitmapUtil {
         ApplicationBase.getRefWatcher(context).watch(subscription);
     }
 
-    @Nullable public static byte[] load(Context context, String url) {
-        File file = new File(context.getCacheDir(), url);
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-            byte[] bytes = new byte[2048];
-            int bytesRead;
-            while ((bytesRead = fis.read(bytes)) != -1) {
-                byteArray.write(bytes, 0, bytesRead);
-            }
-            return byteArray.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Nullable public static Bitmap decodeBitmap(Context context, String url, BitmapFactory.Options options) {
-        File file = new File(context.getCacheDir(), url);
+    @Nullable public static Bitmap decodeBitmap(File file, BitmapFactory.Options options) {
         try {
             FileInputStream fis = new FileInputStream(file);
             return BitmapFactory.decodeStream(fis, null, options);
@@ -175,12 +182,22 @@ public class BitmapUtil {
         return null;
     }
 
+    @Nullable public static Bitmap decodeSampledBitmap(String url, int reqWidth, int reqHeight) {
+        return decodeSampledBitmap(null, url, reqWidth, reqHeight);
+    }
+
     @Nullable public static Bitmap decodeSampledBitmap(Context context, String url, int reqWidth, int reqHeight) {
         long time = System.currentTimeMillis();
         // first decode check the raw image dimensions
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        decodeBitmap(context, url, options);
+        File file;
+        if (context == null) {
+            file = getFile(url);
+        } else {
+            file = getCacheFile(context, url);
+        }
+        decodeBitmap(file, options);
 
         // calculate the factor to scale down by depending on the desired height
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -193,7 +210,7 @@ public class BitmapUtil {
         time = System.currentTimeMillis() - time;
         Log.i(TAG, "complexity time of decoding bitmap is: " + time);
 
-        return decodeBitmap(context, url, options);
+        return decodeBitmap(file, options);
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -214,7 +231,7 @@ public class BitmapUtil {
         return inSampleSize;
     }
 
-    public static void copy(final File src, final File dst) throws IOException {
+    public static void copy(final File src, final File dst) {
         Observable.create(new Observable.OnSubscribe<Void>() {
             @Override public void call(Subscriber<? super Void> subscriber) {
                 try {

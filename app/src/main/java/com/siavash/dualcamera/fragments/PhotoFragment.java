@@ -1,5 +1,6 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
@@ -18,10 +19,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.siavash.dualcamera.Constants;
+import com.siavash.dualcamera.R;
 import com.siavash.dualcamera.util.BitmapUtil;
-import com.siavash.dualcamera.util.Toolbar;
-
-import java.io.File;
+import com.siavash.dualcamera.util.customviews.Toolbar;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -31,7 +32,7 @@ import rx.Observer;
  * Editing photos before saving into file or sharing with others
  * Created by sia on 8/18/15.
  */
-public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, Observer {
+public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListener, Observer {
     private static final String TAG = PhotoFragment.class.getSimpleName();
     private static PhotoFragment sPhotoFragment;
 
@@ -39,7 +40,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
     @Bind(R.id.photo_layout) RelativeLayout photoLayout;
     @Bind(R.id.photo_back) ImageView backImageView;
     @Bind(R.id.photo_front) ImageView frontImageView;
-    @Bind(R.id.save_and_share) Button saveAndShare;
+    @Bind(R.id.save_and_share) Button goToShare;
 
     private OnFragmentChange mCallback;
     private ProgressDialog progressDialog;
@@ -56,24 +57,34 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
         return sPhotoFragment;
     }
 
+    @Override public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback = (OnFragmentChange) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnFragmentChange");
+        }
+    }
+
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "PhotoFragment onCreateView");
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         ButterKnife.bind(this, view);
         // Set up toolbar
-        toolbar.setCallback(this);
         toolbar.setTitle("ویرایش عکس");
-
-        mCallback = (OnFragmentChange) getActivity();
+        toolbar.setCallback(this);
 
         final DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mWidth = metrics.widthPixels;
         mHeight = metrics.heightPixels;
-        // Save and share button on click listener
-        saveAndShare.setOnClickListener(new View.OnClickListener() {
+        // go to share button on click listener
+        goToShare.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                saveFile(photoLayout);
+                photoLayout.setDrawingCacheEnabled(true);
+                Bitmap bitmap = photoLayout.getDrawingCache();
+                mImageUrl = BitmapUtil.save(getActivity(), bitmap, BitmapUtil.setFile(Constants.IMAGE_URL));
+                photoLayout.setDrawingCacheEnabled(false);
                 mCallback.switchFragmentTo(Constants.SHARE_FRAGMENT, mImageUrl);
             }
         });
@@ -127,13 +138,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnClickListener, 
         frontImageView.setOnTouchListener(new OnTouchListener(backImageView));
     }
 
-    private void saveFile(View view) {
-        view.setDrawingCacheEnabled(true);
-        Bitmap bitmap = view.getDrawingCache();
-        mImageUrl = BitmapUtil.save(getActivity(), bitmap, BitmapUtil.getOutputMediaFile(getActivity()), null);
-    }
-
-    @Override public void onClick() {
+    @Override public void goBack() {
         mCallback.switchFragmentTo(Constants.CAMERA_FRONT_FRAGMENT);
     }
 

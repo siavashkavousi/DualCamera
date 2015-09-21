@@ -2,5 +2,8 @@
 <resources>
     <color name="grey_dark">#323232</color>
     <color name="grey">#455A64</color>
-    <color name="grey_light">#DDDDDD</color>
+    <color name="grey_light">#607D8B</color>
+    <color name="orange_dark">#F57C00</color>
+    <color name="orange">#FF9800</color>
+    <color name="red_light">#FF5722</color>
 </resources>

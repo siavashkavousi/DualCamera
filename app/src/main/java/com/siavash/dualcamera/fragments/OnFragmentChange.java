@@ -1,4 +1,4 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.fragments;
 
 /**
  * Created by sia on 9/18/15.

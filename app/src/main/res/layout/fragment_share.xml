@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/grey_dark"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.siavash.dualcamera.util.Toolbar
+        <com.siavash.dualcamera.util.customviews.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,7 +34,7 @@
             android:layout_marginStart="@dimen/space_medium"
             android:layout_marginTop="@dimen/space_medium">
 
-            <com.siavash.dualcamera.util.CustomTextView
+            <com.siavash.dualcamera.util.customviews.TextView
                 android:id="@+id/share_to"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
