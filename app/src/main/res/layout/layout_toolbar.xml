@@ -21,7 +21,7 @@
         android:maxHeight="24dp"
         android:maxWidth="24dp"
         android:padding="12dp"
-        android:src="@drawable/ic_next"
+        android:src="@drawable/ic_back"
         tools:ignore="contentDescription"/>
 
     <View
