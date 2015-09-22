@@ -89,7 +89,7 @@
                     android:drawablePadding="@dimen/space_low"
                     android:drawableStart="@drawable/ic_whatsapp"
                     android:layout_gravity="center"
-                    android:text="@string/twitter"
+                    android:text="@string/whatsapp"
                     android:layout_row="1"
                     android:layout_column="0"/>
 

@@ -24,7 +24,8 @@ public class Toolbar<T> extends RelativeLayout implements View.OnClickListener {
 
     @Bind(R.id.title) TextView title;
     @Bind(R.id.back_btn) ImageButton backButton;
-    @Bind(R.id.action_btn) Button actionButton;
+    @Bind(R.id.action_btn) ImageButton actionButton;
+    @Bind(R.id.action_btn_side_view) View actionButtonSideView;
 
     private OnBackClickListener mBackCallback;
     private OnActionClickListener mActionCallback;
@@ -76,13 +77,9 @@ public class Toolbar<T> extends RelativeLayout implements View.OnClickListener {
         backButton.setImageBitmap(bitmap);
     }
 
-    public void setActionButtonText(String text){
-        actionButton.setText(text);
-        actionButton.setUpFont(getContext(), StringUtil.FONT_AFSANEH);
-    }
-
     public void setActionButtonVisibility(int visibility) {
         actionButton.setVisibility(visibility);
+        actionButtonSideView.setVisibility(visibility);
         setActionButtonCallback();
     }
 

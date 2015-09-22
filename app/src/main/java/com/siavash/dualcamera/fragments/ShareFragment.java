@@ -34,7 +34,7 @@ import butterknife.ButterKnife;
  * Share or save photos to file
  * Created by siavash on 3/6/2015.
  */
-public class ShareFragment extends Fragment implements Toolbar.OnBackClickListener, Toolbar.OnActionClickListener {
+public class ShareFragment extends Fragment implements Toolbar.OnBackClickListener {
 
     private static final String TAG = ShareFragment.class.getSimpleName();
 
@@ -84,8 +84,6 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
         ButterKnife.bind(this, view);
         // Set up toolbar
         toolbar.setTitle("اشتراک گذاری");
-        toolbar.setActionButtonVisibility(View.VISIBLE);
-        toolbar.setActionButtonText("ذخیره");
         toolbar.setCallback(this);
 
         shareTextView.setUpFont(getActivity(), StringUtil.FONT_IRAN_NASTALIQ);
@@ -131,11 +129,6 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
 
     @Override public void goBack() {
         getActivity().onBackPressed();
-    }
-
-
-    @Override public void doAction() {
-        BitmapUtil.copy(new File(mImageUrl), BitmapUtil.setImageFile());
     }
 
     private class OnClickListener implements View.OnClickListener {

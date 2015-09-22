@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@color/grey_dark">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:background="@color/grey_dark">
 
     <com.siavash.dualcamera.util.customviews.Toolbar
         android:id="@+id/toolbar"
@@ -38,12 +39,5 @@
             android:paddingTop="4dp"
             tools:ignore="contentDescription"/>
     </RelativeLayout>
-
-    <com.siavash.dualcamera.util.customviews.Button
-        android:id="@+id/save_and_share"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/go_to_share"
-        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

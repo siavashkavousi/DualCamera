@@ -2,23 +2,21 @@ package com.siavash.dualcamera.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
 import com.siavash.dualcamera.util.BitmapUtil;
@@ -32,7 +30,7 @@ import rx.Observer;
  * Editing photos before saving into file or sharing with others
  * Created by sia on 8/18/15.
  */
-public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListener, Observer {
+public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListener, Toolbar.OnActionClickListener, Observer {
     private static final String TAG = PhotoFragment.class.getSimpleName();
     private static PhotoFragment sPhotoFragment;
 
@@ -40,10 +38,9 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     @Bind(R.id.photo_layout) RelativeLayout photoLayout;
     @Bind(R.id.photo_back) ImageView backImageView;
     @Bind(R.id.photo_front) ImageView frontImageView;
-    @Bind(R.id.save_and_share) Button goToShare;
 
     private OnFragmentChange mCallback;
-    private ProgressDialog progressDialog;
+    private MaterialDialog progressDialog;
     private int mWidth, mHeight;
     private String mImageUrl;
 
@@ -60,7 +57,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     @Override public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mCallback = (OnFragmentChange) getActivity();
+            mCallback = (OnFragmentChange) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnFragmentChange");
         }
@@ -72,24 +69,15 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
         ButterKnife.bind(this, view);
         // Set up toolbar
         toolbar.setTitle("ویرایش عکس");
+        toolbar.setActionButtonVisibility(View.VISIBLE);
         toolbar.setCallback(this);
 
         final DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mWidth = metrics.widthPixels;
         mHeight = metrics.heightPixels;
-        // go to share button on click listener
-        goToShare.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                photoLayout.setDrawingCacheEnabled(true);
-                Bitmap bitmap = photoLayout.getDrawingCache();
-                mImageUrl = BitmapUtil.save(getActivity(), bitmap, BitmapUtil.setFile(Constants.IMAGE_URL));
-                photoLayout.setDrawingCacheEnabled(false);
-                mCallback.switchFragmentTo(Constants.SHARE_FRAGMENT, mImageUrl);
-            }
-        });
 
-        progressDialog = ProgressDialog.show(getActivity(), "در حال بارگذاری", "دو دقه توش نگه دار", true);
+        progressDialog = new MaterialDialog.Builder(getActivity()).title("در حال بارگذاری").content("وایسا بچه").progress(true, 0).progressIndeterminateStyle(true).show();
 
         return view;
     }
@@ -140,6 +128,14 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
 
     @Override public void goBack() {
         mCallback.switchFragmentTo(Constants.CAMERA_FRONT_FRAGMENT);
+    }
+
+    @Override public void doAction() {
+        photoLayout.setDrawingCacheEnabled(true);
+        Bitmap bitmap = photoLayout.getDrawingCache();
+        mImageUrl = BitmapUtil.save(getActivity(), bitmap, BitmapUtil.setImageFile());
+        photoLayout.setDrawingCacheEnabled(false);
+        mCallback.switchFragmentTo(Constants.SHARE_FRAGMENT, mImageUrl);
     }
 
     private class OnTouchListener implements View.OnTouchListener {
@@ -194,7 +190,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
                     lastEvent = null;
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
-                    oldDistance = spacing(event);
+                    oldDistance = (float) spacing(event);
                     if (oldDistance > 10f) {
                         savedMatrix.set(matrix);
                         midPoint(mid, event);
@@ -226,7 +222,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
 
                         view.setLayoutParams(layoutParams);
                     } else if (mode == ZOOM && event.getPointerCount() == 2) {
-                        float newDistance = spacing(event);
+                        float newDistance = (float) spacing(event);
                         matrix.set(savedMatrix);
                         if (newDistance > 20f) {
                             float scale = newDistance / oldDistance;
@@ -250,10 +246,10 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
             return (float) Math.toDegrees(Math.atan2(event.getY(0) - event.getY(1), event.getX(0) - event.getX(1)));
         }
 
-        private float spacing(MotionEvent event) {
+        private double spacing(MotionEvent event) {
             float x = event.getX(0) - event.getX(1);
             float y = event.getY(0) - event.getY(1);
-            return FloatMath.sqrt(x * x + y * y);
+            return Math.sqrt(x * x + y * y);
         }
 
         private void midPoint(PointF point, MotionEvent event) {
