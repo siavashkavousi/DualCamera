@@ -3,8 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/grey_dark"
     android:layout_height="match_parent"
+    android:background="@color/grey_dark"
     android:fillViewport="true">
 
     <LinearLayout
@@ -59,51 +59,51 @@
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="@dimen/share_btn_width"
                     android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:layout_row="0"
                     android:drawableLeft="@drawable/ic_facebook"
                     android:drawablePadding="@dimen/space_low"
                     android:drawableStart="@drawable/ic_facebook"
-                    android:text="@string/facebook"
-                    android:layout_gravity="center"
-                    android:layout_row="0"
-                    android:layout_column="0"/>
+                    android:text="@string/facebook"/>
 
                 <Button
                     android:id="@+id/instagram"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="@dimen/share_btn_width"
                     android:layout_height="wrap_content"
+                    android:layout_column="1"
                     android:layout_gravity="center"
+                    android:layout_row="0"
                     android:drawableLeft="@drawable/ic_instagram"
                     android:drawablePadding="@dimen/space_low"
                     android:drawableStart="@drawable/ic_instagram"
-                    android:text="@string/instagram"
-                    android:layout_row="0"
-                    android:layout_column="1"/>
+                    android:text="@string/instagram"/>
 
                 <Button
                     android:id="@+id/whatsapp"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="@dimen/share_btn_width"
                     android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:layout_row="1"
                     android:drawableLeft="@drawable/ic_whatsapp"
                     android:drawablePadding="@dimen/space_low"
                     android:drawableStart="@drawable/ic_whatsapp"
-                    android:layout_gravity="center"
-                    android:text="@string/whatsapp"
-                    android:layout_row="1"
-                    android:layout_column="0"/>
+                    android:text="@string/whatsapp"/>
 
                 <Button
                     android:id="@+id/telegram"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="@dimen/share_btn_width"
                     android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_telegram"
-                    android:drawableStart="@drawable/ic_telegram"
-                    android:text="@string/telegram"
+                    android:layout_column="1"
                     android:layout_gravity="center"
                     android:layout_row="1"
-                    android:layout_column="1"/>
+                    android:drawableLeft="@drawable/ic_telegram"
+                    android:drawableStart="@drawable/ic_telegram"
+                    android:text="@string/telegram"/>
 
             </GridLayout>
 

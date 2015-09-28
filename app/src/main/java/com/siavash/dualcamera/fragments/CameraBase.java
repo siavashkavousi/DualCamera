@@ -111,7 +111,7 @@ public abstract class CameraBase extends Fragment {
                 Log.d(TAG, "onPictureTaken called! saving into file is about to start");
             if (mUrl.isEmpty()) return;
 
-            BitmapUtil.save(mActivity.get(), data, mUrl, Constants.DISPLAY_ORIENTATION, mPhotoFragment.get());
+            BitmapUtil.save(mActivity.get(), data, sFrontBack, mUrl, Constants.DISPLAY_ORIENTATION, mPhotoFragment.get());
             mCallback.switchFragmentTo(sFrontBack);
         }
     }

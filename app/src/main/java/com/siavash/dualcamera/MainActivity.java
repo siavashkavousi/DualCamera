@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentChange 
                 FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraBack);
                 break;
             case Constants.PHOTO_FRAGMENT:
-                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT_TAG, R.anim.slide_in_bottom, 0, 0, R.anim.slide_out_bottom);
+                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT_TAG);
                 break;
             case Constants.SHARE_FRAGMENT:
                 ShareFragment shareFragment = ShareFragment.newInstance(optionalValues[0]);

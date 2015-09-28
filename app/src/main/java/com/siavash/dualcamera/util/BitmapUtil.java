@@ -119,8 +119,8 @@ public class BitmapUtil {
         return targetFile.getAbsolutePath();
     }
 
-    public static void save(Context context, byte[] data, String url, int orientation) {
-        save(context, data, url, orientation, null);
+    public static void save(Context context, byte[] data, int frontBack, String url, int orientation) {
+        save(context, data, frontBack, url, orientation, null);
     }
 
     /**
@@ -131,7 +131,7 @@ public class BitmapUtil {
      * @param url         place to save in cache folder
      * @param orientation orientation of the taken photo
      */
-    public static <T extends Observer> void save(Context context, final byte[] data, String url, final int orientation, T observer) {
+    public static <T extends Observer> void save(Context context, final byte[] data, final int frontBack, String url, final int orientation, T observer) {
         final long time = System.currentTimeMillis();
 
         final File file = new File(context.getCacheDir(), url);
@@ -147,10 +147,18 @@ public class BitmapUtil {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 if (orientation != 0) {
                     Matrix matrix = new Matrix();
-                    if (bitmap.getWidth() > bitmap.getHeight()) {
-                        matrix.postRotate(orientation);
-                    } else {
-                        matrix.postRotate(-orientation);
+                    if (frontBack == Constants.CAMERA_BACK_FRAGMENT) {
+                        if (bitmap.getWidth() > bitmap.getHeight()) {
+                            matrix.postRotate(-orientation);
+                        } else {
+                            matrix.postRotate(orientation);
+                        }
+                    } else if (frontBack == Constants.PHOTO_FRAGMENT) {
+                        if (bitmap.getWidth() > bitmap.getHeight()) {
+                            matrix.postRotate(orientation);
+                        } else {
+                            matrix.postRotate(-orientation);
+                        }
                     }
                     bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
                 }
