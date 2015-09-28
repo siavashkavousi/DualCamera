@@ -6,6 +6,8 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.util.Log;
 
+import com.siavash.dualcamera.Constants;
+
 public class StringUtil {
     private final static String TAG = StringUtil.class.getSimpleName();
 
@@ -92,7 +94,7 @@ public class StringUtil {
                 return (urdu == null ? (urdu = Typeface.createFromAsset(
                         context.getAssets(), FONT_PATH_PREFIX + FONT_URDU)) : urdu);
         }
-        Log.e(TAG, "Error in loading typeface:  " + fontName);
+        if (Constants.IS_DEBUG) Log.d(TAG, "Error in loading typeface:  " + fontName);
         return null;
     }
 

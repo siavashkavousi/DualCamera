@@ -62,7 +62,7 @@ public class BitmapUtil {
 
         if (!imageDir.exists()) {
             if (!imageDir.mkdirs()) {
-                Log.d(TAG, "Required media storage does not exist");
+                if (Constants.IS_DEBUG) Log.d(TAG, "Required media storage does not exist");
                 return null;
             }
         }
@@ -156,7 +156,7 @@ public class BitmapUtil {
                 }
                 bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
                 bitmap.recycle();
-                if (Constants.isDebug)
+                if (Constants.IS_DEBUG)
                     Log.d(TAG, "save bitmap with orientation: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
                 subscriber.onCompleted();
             }
@@ -208,7 +208,7 @@ public class BitmapUtil {
 
         // measure the complexity time of decoding bitmap
         time = System.currentTimeMillis() - time;
-        Log.i(TAG, "complexity time of decoding bitmap is: " + time);
+        if (Constants.IS_DEBUG) Log.d(TAG, "complexity time of decoding bitmap is: " + time);
 
         return decodeBitmap(file, options);
     }
@@ -243,7 +243,7 @@ public class BitmapUtil {
                     inChannel.transferTo(0, inChannel.size(), outChannel);
                     inStream.close();
                     outStream.close();
-                    if (Constants.isDebug)
+                    if (Constants.IS_DEBUG)
                         Log.d(TAG, "Time to copy: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
                 } catch (IOException e) {
                     e.printStackTrace();

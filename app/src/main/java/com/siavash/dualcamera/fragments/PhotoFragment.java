@@ -64,7 +64,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     }
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "PhotoFragment onCreateView");
+        if (Constants.IS_DEBUG) Log.d(TAG, "PhotoFragment onCreateView");
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         ButterKnife.bind(this, view);
         // Set up toolbar
@@ -77,7 +77,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
         mWidth = metrics.widthPixels;
         mHeight = metrics.heightPixels;
 
-        progressDialog = new MaterialDialog.Builder(getActivity()).title("در حال بارگذاری").content("وایسا بچه").progress(true, 0).progressIndeterminateStyle(true).show();
+        progressDialog = new MaterialDialog.Builder(getActivity()).title("در حال بارگذاری").content("در حال بارگذاری عکس ها").progress(true, 0).progressIndeterminateStyle(true).show();
 
         return view;
     }
@@ -99,10 +99,12 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     private void setUpImageView() {
         final Bitmap frontBitmap = BitmapUtil.decodeSampledBitmap(getActivity(), Constants.CAMERA_FRONT_IMAGE_URL, mWidth / 4, mHeight / 4);
         if (frontBitmap == null) throw new NullPointerException("Front bitmap is null");
-        Log.d(TAG, "front camera bitmap width: " + frontBitmap.getWidth() + " and height: " + frontBitmap.getHeight());
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, "front camera bitmap width: " + frontBitmap.getWidth() + " and height: " + frontBitmap.getHeight());
         final Bitmap backBitmap = BitmapUtil.decodeSampledBitmap(getActivity(), Constants.CAMERA_BACK_IMAGE_URL, mWidth, mHeight);
         if (backBitmap == null) throw new NullPointerException("Back bitmap is null");
-        Log.d(TAG, "back camera bitmap width: " + backBitmap.getWidth() + " and height: " + backBitmap.getHeight());
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, "back camera bitmap width: " + backBitmap.getWidth() + " and height: " + backBitmap.getHeight());
 
         frontImageView.post(new Runnable() {
             @Override public void run() {
@@ -120,9 +122,10 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
 
         int[] location = new int[2];
         backImageView.getLocationOnScreen(location);
-        Log.d(TAG, location[0] + " " + location[1] + " " + backImageView.getWidth() + " " + backImageView.getHeight()
-                + " " + backImageView.getTop() + " " + backImageView.getBottom() + " " + backImageView.getLeft()
-                + " " + backImageView.getRight());
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, location[0] + " " + location[1] + " " + backImageView.getWidth() + " " + backImageView.getHeight()
+                    + " " + backImageView.getTop() + " " + backImageView.getBottom() + " " + backImageView.getLeft()
+                    + " " + backImageView.getRight());
         frontImageView.setOnTouchListener(new OnTouchListener(backImageView));
     }
 
@@ -285,7 +288,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
             }
 
             sb.append("]");
-            Log.d(TAG, sb.toString());
+            if (Constants.IS_DEBUG) Log.d(TAG, sb.toString());
         }
     }
 }

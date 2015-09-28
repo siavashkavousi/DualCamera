@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.siavash.dualcamera.control.CameraPreview;
 import com.siavash.dualcamera.Constants;
+import com.siavash.dualcamera.control.CameraPreview;
 import com.siavash.dualcamera.util.BitmapUtil;
 
 import java.lang.ref.WeakReference;
@@ -54,7 +54,6 @@ public abstract class CameraBase extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "CameraBase onCreate method called");
         mPictureCallback = new PictureCallback(getActivity(), mPhotoFragment);
     }
 
@@ -108,7 +107,8 @@ public abstract class CameraBase extends Fragment {
         }
 
         @Override public void onPictureTaken(byte[] data, Camera camera) {
-            Log.d(TAG, "onPictureTaken called! saving into file is about to start");
+            if (Constants.IS_DEBUG)
+                Log.d(TAG, "onPictureTaken called! saving into file is about to start");
             if (mUrl.isEmpty()) return;
 
             BitmapUtil.save(mActivity.get(), data, mUrl, Constants.DISPLAY_ORIENTATION, mPhotoFragment.get());

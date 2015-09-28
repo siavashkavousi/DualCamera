@@ -1,5 +1,6 @@
 package com.siavash.dualcamera;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentChange 
                 FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraBack);
                 break;
             case Constants.PHOTO_FRAGMENT:
-                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment, R.anim.slide_in_bottom, 0, 0, R.anim.slide_out_bottom);
+                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT_TAG, R.anim.slide_in_bottom, 0, 0, R.anim.slide_out_bottom);
                 break;
             case Constants.SHARE_FRAGMENT:
                 ShareFragment shareFragment = ShareFragment.newInstance(optionalValues[0]);
@@ -53,14 +54,15 @@ public class MainActivity extends AppCompatActivity implements OnFragmentChange 
 
     @Override public void onBackPressed() {
         FragmentManager fragmentManager = getFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(Constants.PHOTO_FRAGMENT_TAG);
         if (fragmentManager.getBackStackEntryCount() > 0) {
-            Log.d(TAG, "popping back stack");
+            if (Constants.IS_DEBUG) Log.d(TAG, "popping back stack");
             fragmentManager.popBackStack();
-        } else if (fragmentManager.getBackStackEntryCount() == 0) {
-            Log.d(TAG, "back to camera front fragment");
+        } else if (fragment instanceof PhotoFragment) {
+            if (Constants.IS_DEBUG) Log.d(TAG, "back to camera front fragment");
             switchFragmentTo(Constants.CAMERA_FRONT_FRAGMENT);
         } else {
-            Log.d(TAG, "nothing on back stack, calling super");
+            if (Constants.IS_DEBUG) Log.d(TAG, "nothing on back stack, calling super");
             super.onBackPressed();
         }
     }

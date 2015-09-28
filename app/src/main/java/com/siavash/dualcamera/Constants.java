@@ -19,7 +19,9 @@ public class Constants {
     public static final int CAMERA_BACK_FRAGMENT = 1;
     public static final int CAMERA_FRONT_FRAGMENT = 2;
     public static final int SHARE_FRAGMENT = 3;
+
+    public static final String PHOTO_FRAGMENT_TAG = "photoFragment";
     //endregion
 
-    public static boolean isDebug = true;
+    public static final boolean IS_DEBUG = true;
 }

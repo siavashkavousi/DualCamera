@@ -191,7 +191,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         {
             Display display = activity.getWindowManager().getDefaultDisplay();
             display.getSize(displaySize);
-            Log.d(TAG, "display size: " + displaySize.x + "," + displaySize.y);
+            if (Constants.IS_DEBUG)
+                Log.d(TAG, "display size: " + displaySize.x + "," + displaySize.y);
         }
         double targetRatio = (double) displaySize.x / (double) displaySize.y;
         int targetHeight = Math.min(displaySize.y, displaySize.x);
@@ -200,7 +201,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         // Try to find the size which matches the aspect ratio, and is closest match to display height
         for (Camera.Size size : sizes) {
-            Log.d(TAG, "supported preview size: " + size.width + "," + size.height);
+            if (Constants.IS_DEBUG)
+                Log.d(TAG, "supported preview size: " + size.width + "," + size.height);
             double ratio = (double) size.width / size.height;
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
                 continue;
@@ -211,11 +213,55 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         if (optimalSize == null) {
             // can't find match for aspect ratio, so find closest one
-            Log.d(TAG, "no preview size matches the aspect ratio");
+            if (Constants.IS_DEBUG) Log.d(TAG, "no preview size matches the aspect ratio");
             optimalSize = getClosestSize(sizes, targetRatio);
         }
-        Log.d(TAG, "chosen optimalSize: " + optimalSize.width + " x " + optimalSize.height);
-        Log.d(TAG, "optimal size ratio: " + ((double) optimalSize.width / optimalSize.height));
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, "chosen optimalSize: " + optimalSize.width + " x " + optimalSize.height);
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, "optimal size ratio: " + ((double) optimalSize.width / optimalSize.height));
+        return optimalSize;
+    }
+
+    private Camera.Size getOptimalPreviewSizeBeta(List<Camera.Size> sizes) {
+        final double ASPECT_TOLERANCE = 0.05;
+        if (sizes == null) return null;
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+        Point displaySize = new Point();
+        Activity activity = (Activity) mContext;
+        {
+            Display display = activity.getWindowManager().getDefaultDisplay();
+            display.getSize(displaySize);
+            if (Constants.IS_DEBUG)
+                Log.d(TAG, "display size: " + displaySize.x + "," + displaySize.y);
+        }
+        double targetRatio = (double) displaySize.x / (double) displaySize.y;
+        int targetHeight = Math.max(displaySize.y, displaySize.x);
+        if (targetHeight <= 0) {
+            targetHeight = displaySize.y;
+        }
+        // Try to find the size which matches the aspect ratio, and is closest match to display height
+        for (Camera.Size size : sizes) {
+            if (Constants.IS_DEBUG)
+                Log.d(TAG, "supported preview size: " + size.width + "," + size.height);
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+        }
+        if (optimalSize == null) {
+            // can't find match for aspect ratio, so find closest one
+            if (Constants.IS_DEBUG) Log.d(TAG, "no preview size matches the aspect ratio");
+            optimalSize = getClosestSize(sizes, targetRatio);
+        }
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, "chosen optimalSize: " + optimalSize.width + " x " + optimalSize.height);
+        if (Constants.IS_DEBUG)
+            Log.d(TAG, "optimal size ratio: " + ((double) optimalSize.width / optimalSize.height));
         return optimalSize;
     }
 
