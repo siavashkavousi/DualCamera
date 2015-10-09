@@ -14,13 +14,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
-import com.siavash.dualcamera.util.BitmapUtil;
+import com.siavash.dualcamera.util.Util;
 import com.siavash.dualcamera.util.customviews.Toolbar;
 
 import butterknife.Bind;
@@ -35,6 +35,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     private static final String TAG = PhotoFragment.class.getSimpleName();
     private static PhotoFragment sPhotoFragment;
 
+    @Bind(R.id.scroll_view) ScrollView scrollView;
     @Bind(R.id.toolbar) Toolbar<PhotoFragment> toolbar;
     @Bind(R.id.photo_layout) RelativeLayout photoLayout;
     @Bind(R.id.photo_back) ImageView backImageView;
@@ -98,11 +99,11 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     }
 
     private void setUpImageView() {
-        final Bitmap frontBitmap = BitmapUtil.decodeSampledBitmap(getActivity(), Constants.CAMERA_FRONT_IMAGE_URL, mWidth / 4, mHeight / 4);
+        final Bitmap frontBitmap = Util.decodeSampledBitmap(Util.getCacheFile(getActivity(), Constants.CAMERA_FRONT_IMAGE_URL), mWidth / 4, mHeight / 4);
         if (frontBitmap == null) throw new NullPointerException("Front bitmap is null");
         if (Constants.IS_DEBUG)
             Log.d(TAG, "front camera bitmap width: " + frontBitmap.getWidth() + " and height: " + frontBitmap.getHeight());
-        final Bitmap backBitmap = BitmapUtil.decodeSampledBitmap(getActivity(), Constants.CAMERA_BACK_IMAGE_URL, mWidth, mHeight);
+        final Bitmap backBitmap = Util.decodeSampledBitmap(Util.getCacheFile(getActivity(), Constants.CAMERA_BACK_IMAGE_URL), mWidth, mHeight);
         if (backBitmap == null) throw new NullPointerException("Back bitmap is null");
         if (Constants.IS_DEBUG)
             Log.d(TAG, "back camera bitmap width: " + backBitmap.getWidth() + " and height: " + backBitmap.getHeight());
@@ -137,7 +138,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     @Override public void doAction() {
         photoLayout.setDrawingCacheEnabled(true);
         Bitmap bitmap = photoLayout.getDrawingCache();
-        mImageUrl = BitmapUtil.save(getActivity(), bitmap, BitmapUtil.setImageFile());
+        mImageUrl = Util.saveAsync(getActivity(), bitmap, Util.setImageFile());
         photoLayout.setDrawingCacheEnabled(false);
         mCallback.switchFragmentTo(Constants.SHARE_FRAGMENT, mImageUrl);
     }
@@ -183,6 +184,8 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
             // Handle touch events here...
             switch (event.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
+                    view.getParent().requestDisallowInterceptTouchEvent(true);
+
                     dx = event.getRawX() - layoutParams.leftMargin;
                     dy = event.getRawY() - layoutParams.topMargin;
                     dz = event.getRawX() - layoutParams.bottomMargin;
@@ -213,6 +216,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
                     lastEvent = null;
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    view.getParent().requestDisallowInterceptTouchEvent(true);
                     if (mode == DRAG) {
                         matrix.set(savedMatrix);
 

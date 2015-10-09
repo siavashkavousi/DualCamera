@@ -15,13 +15,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
-import com.siavash.dualcamera.util.BitmapUtil;
-import com.siavash.dualcamera.util.customviews.TextView;
-import com.siavash.dualcamera.util.customviews.Toast;
 import com.siavash.dualcamera.util.StringUtil;
+import com.siavash.dualcamera.util.Util;
 import com.siavash.dualcamera.util.customviews.Toolbar;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
     private static final String TAG = ShareFragment.class.getSimpleName();
 
     @Bind(R.id.toolbar) Toolbar<ShareFragment> toolbar;
-    @Bind({R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram}) List<Button> socialNetworks;
+    @Bind({R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more}) List<Button> socialNetworks;
     @Bind(R.id.share_to) TextView shareTextView;
     @Bind(R.id.photo_container) ImageView image;
 
@@ -75,7 +75,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
         int imageHeight = metrics.heightPixels;
 
         mImageUrl = getArguments().getString(Constants.IMAGE_URL);
-        Bitmap bitmap = BitmapUtil.decodeSampledBitmap(mImageUrl, imageWidth, imageHeight);
+        Bitmap bitmap = Util.decodeSampledBitmap(Util.getFile(mImageUrl), imageWidth, imageHeight);
         image.setImageBitmap(bitmap);
     }
 
@@ -86,10 +86,17 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
         toolbar.setTitle("اشتراک گذاری");
         toolbar.setCallback(this);
 
-        shareTextView.setUpFont(getActivity(), StringUtil.FONT_IRAN_NASTALIQ);
-
+        setTypefaces();
         setListeners();
+
         return view;
+    }
+
+    private void setTypefaces(){
+        shareTextView.setTypeface(StringUtil.getFont(getActivity(), StringUtil.FONT_AFSANEH));
+        for (Button button : socialNetworks){
+            button.setTypeface(StringUtil.getFont(getActivity(), StringUtil.FONT_NAZANIN_BOLD));
+        }
     }
 
     private void setListeners() {
@@ -98,6 +105,8 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
         socialNetworks.get(1).setOnClickListener(onClickListener);
         socialNetworks.get(2).setOnClickListener(onClickListener);
         socialNetworks.get(3).setOnClickListener(onClickListener);
+        socialNetworks.get(4).setOnClickListener(onClickListener);
+        socialNetworks.get(5).setOnClickListener(onClickListener);
     }
 
     private void shareIntent(String intentName, String socialName) {
@@ -123,7 +132,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
 
         if (resolved) startActivity(prototype);
         else {
-            Toast.makeText(getActivity(), "تو که " + appNameInPersian + " رو نصب نداری! ");
+            Toast.makeText(getActivity(), appNameInPersian + " نصب نیست!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -144,6 +153,13 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
                 shareIntent("telegram", "تلگرام");
             } else if (id == socialNetworks.get(3).getId()) {
                 shareIntent("instagram", "اینستاگرام");
+            } else if (id == socialNetworks.get(4).getId()) {
+                shareIntent("line", "لاین");
+            } else if (id == socialNetworks.get(5).getId()) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("image/jpg");
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(mImageUrl)));
+                startActivity(intent);
             }
         }
     }

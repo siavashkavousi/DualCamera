@@ -1,19 +1,16 @@
 <resources>
-    <string name="app_name">دوربین دوگانه</string>
+    <string name="app_name">عکاس در عکس</string>
     <string name="save_photo">عکس شما ذخیره شد</string>
     <string name="save_photo_failed">عکس شما ذخیره نشد</string>
     <string name="action_settings">Settings</string>
     <string name="go_to_share">برو به اشتراک گذاری</string>
 
     <string name="shareContent">شبکه های اجتماعی</string>
-    <string name="instagram">Instagram</string>
-    <string name="whatsapp">WhatsApp</string>
-    <string name="flicker">Flicker</string>
-    <string name="line">Line</string>
-    <string name="tango">Tango</string>
-    <string name="facebook">Facebook</string>
-    <string name="twitter">Twitter</string>
-    <string name="viber">Viber</string>
-    <string name="telegram">Telegram</string>
+    <string name="instagram">اینستاگرام</string>
+    <string name="whatsapp">واتس اپ</string>
+    <string name="line">لاین</string>
+    <string name="facebook">فیسبوک</string>
+    <string name="telegram">تلگرام</string>
     <string name="save">ذخیره</string>
+    <string name="more">بیشتر</string>
 </resources>

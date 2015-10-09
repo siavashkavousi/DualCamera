@@ -10,7 +10,7 @@ public class Constants {
     public static final String CAMERA_FRONT_IMAGE_URL = "camera_front_url";
     public static final String CAMERA_BACK_IMAGE_URL = "camera_back_url";
     public static final int DISPLAY_ORIENTATION = 90;
-    public static final int COMPRESS_QUALITY = 100;
+    public static final int COMPRESS_QUALITY = 90;
     public static final int CONTAINER_RES_ID = R.id.container;
     //endregion
 
@@ -23,5 +23,5 @@ public class Constants {
     public static final String PHOTO_FRAGMENT_TAG = "photoFragment";
     //endregion
 
-    public static final boolean IS_DEBUG = true;
+    public static final boolean IS_DEBUG = false;
 }
