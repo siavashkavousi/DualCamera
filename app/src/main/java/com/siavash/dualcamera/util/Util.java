@@ -285,7 +285,7 @@ public class Util {
     private static boolean isRoundUpNeeded(int imageSize, int reqSize) {
         int ratio = imageSize / reqSize;
         float fractionalRatio = (float) imageSize / reqSize;
-        return fractionalRatio - ratio > 0.7;
+        return fractionalRatio - ratio > 0.5;
     }
 
     public static DisplayMetrics getDisplaySize(Activity activity) {

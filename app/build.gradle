@@ -8,8 +8,8 @@ android {
         applicationId "com.siavash.dualcamera"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 1
-        versionName "0.1"
+        versionCode 3
+        versionName "0.3"
         renderscriptTargetApi 20
         renderscriptSupportModeEnabled true
     }
