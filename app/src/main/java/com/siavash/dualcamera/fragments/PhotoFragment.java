@@ -19,9 +19,11 @@ import android.widget.RelativeLayout;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
+import com.siavash.dualcamera.activities.PhotoActivity;
 import com.siavash.dualcamera.util.Util;
 import com.siavash.dualcamera.util.customviews.RoundedImageView;
-import com.siavash.dualcamera.util.customviews.Toolbar;
+
+import java.io.File;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -33,11 +35,10 @@ import rx.schedulers.Schedulers;
  * Editing photos before saving into file or sharing with others
  * Created by sia on 8/18/15.
  */
-public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListener, Toolbar.OnActionClickListener, Observer {
+public class PhotoFragment extends Fragment implements Observer {
     private static final String TAG = PhotoFragment.class.getSimpleName();
     private static PhotoFragment photoFragment;
 
-    @Bind(R.id.toolbar) Toolbar<PhotoFragment> toolbar;
     @Bind(R.id.photo_layout) RelativeLayout photoLayout;
     @Bind(R.id.photo_back) ImageView backImageView;
     @Bind(R.id.photo_front) RoundedImageView frontImageView;
@@ -47,9 +48,6 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     private Bitmap frontBitmap, backBitmap;
     private int width, height;
     private String imageUrl;
-
-    private PhotoFragment() {
-    }
 
     public static PhotoFragment getInstance() {
         if (photoFragment == null) {
@@ -68,16 +66,14 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     }
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (Constants.IS_DEBUG) Log.d(TAG, "PhotoFragment onCreateView");
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         ButterKnife.bind(this, view);
-        // Set up toolbar
-        toolbar.setTitle("ویرایش عکس");
-        toolbar.setActionButtonVisibility(View.VISIBLE);
-        toolbar.setCallback(this);
 
-        final DisplayMetrics metrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        if (getActivity() instanceof PhotoActivity){
+            ((PhotoActivity) getActivity()).setToolbarTitle("ویرایش عکس");
+        }
+
+        DisplayMetrics metrics = Util.getDisplaySize(getActivity());
         width = metrics.widthPixels;
         height = metrics.heightPixels;
 
@@ -88,8 +84,7 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
     }
 
     @Override public void onCompleted() {
-        if (CameraBase.sFrontBack == Constants.PHOTO_FRAGMENT) {
-            Log.d(TAG, "which thread : " + Thread.currentThread());
+        if (CameraBase.frontBack == Constants.PHOTO_FRAGMENT) {
             loadPhotos();
         }
     }
@@ -112,12 +107,12 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
             if (backBitmap == null) throw new NullPointerException("Back bitmap is null");
             if (Constants.IS_DEBUG)
                 Log.d(TAG, "back camera bitmap width: " + backBitmap.getWidth() + " and height: " + backBitmap.getHeight());
+            Util.save(photoLayout, new File(getActivity().getCacheDir() + File.separator + Constants.CAMERA_BOTH_IMAGE_URL));
             subscriber.onCompleted();
         }).subscribeOn(Schedulers.computation()).doOnCompleted(this::setPhotosToImageView).subscribe();
     }
 
     private void setPhotosToImageView() {
-        Log.d(TAG, "which thread : " + Thread.currentThread());
         frontImageView.post(() -> {
             frontImageView.setY(200);
             frontImageView.setImageBitmap(frontBitmap);
@@ -127,17 +122,13 @@ public class PhotoFragment extends Fragment implements Toolbar.OnBackClickListen
         progressDialog.dismiss();
     }
 
-    @Override public void goBack() {
-        callback.switchFragmentTo(Constants.CAMERA_FRONT_FRAGMENT);
-    }
-
-    @Override public void doAction() {
-        photoLayout.setDrawingCacheEnabled(true);
-        Bitmap bitmap = photoLayout.getDrawingCache();
-        Observable.create(subscriber -> imageUrl = Util.save(getActivity(), bitmap, Util.setImageFile())).subscribe();
-        photoLayout.setDrawingCacheEnabled(false);
-        callback.switchFragmentTo(Constants.SHARE_FRAGMENT, imageUrl);
-    }
+//    @Override public void doAction() {
+//        photoLayout.setDrawingCacheEnabled(true);
+//        Bitmap bitmap = photoLayout.getDrawingCache();
+//        Observable.create(subscriber -> imageUrl = Util.save(getActivity(), bitmap, Util.setImageFile())).subscribe();
+//        photoLayout.setDrawingCacheEnabled(false);
+//        callback.switchFragmentTo(Constants.SHARE_FRAGMENT, imageUrl);
+//    }
 
     private class OnTouchListener implements View.OnTouchListener {
         private static final int NONE = 0;

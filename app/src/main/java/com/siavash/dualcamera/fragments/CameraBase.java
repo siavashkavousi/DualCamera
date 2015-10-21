@@ -24,20 +24,15 @@ import rx.schedulers.Schedulers;
  */
 public abstract class CameraBase extends Fragment {
     private static final String TAG = CameraBase.class.getSimpleName();
-    public static int sFrontBack;
-    // picture url
-    private static String mUrl;
-    // Native camera.
-    protected Camera mCamera;
-    // View to display the camera output.
-    protected CameraPreview mPreview;
-    // camera picture callback
-    protected PictureCallback mPictureCallback;
-    // photo fragment instance in order to observe saving image bitmaps
-    private PhotoFragment mPhotoFragment;
+    public static int frontBack;
+    private static String url;
+    protected Camera camera;
+    protected CameraPreview preview;
+    protected PictureCallback pictureCallback;
+    private PhotoFragment photoFragment;
 
     public CameraBase(PhotoFragment photoFragment) {
-        mPhotoFragment = photoFragment;
+        this.photoFragment = photoFragment;
     }
 
     /**
@@ -58,7 +53,7 @@ public abstract class CameraBase extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPictureCallback = new PictureCallback(getActivity(), mPhotoFragment);
+        pictureCallback = new PictureCallback(getActivity(), photoFragment);
     }
 
     /**
@@ -73,21 +68,21 @@ public abstract class CameraBase extends Fragment {
      * Clear any existing preview / camera.
      */
     protected void releaseCameraAndPreview() {
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.release();
-            mCamera = null;
+        if (camera != null) {
+            camera.stopPreview();
+            camera.release();
+            camera = null;
         }
-        if (mPreview != null) {
-            mPreview.destroyDrawingCache();
-            mPreview.setCamera(null);
+        if (preview != null) {
+            preview.destroyDrawingCache();
+            preview.setCamera(null);
         }
     }
 
     public void takePicture(String url, int frontBack) {
-        mUrl = url;
-        sFrontBack = frontBack;
-        mCamera.takePicture(null, null, mPictureCallback);
+        CameraBase.url = url;
+        CameraBase.frontBack = frontBack;
+        camera.takePicture(null, null, pictureCallback);
     }
 
     @Override public void onDetach() {
@@ -96,31 +91,31 @@ public abstract class CameraBase extends Fragment {
     }
 
     private static class PictureCallback implements Camera.PictureCallback {
-        private WeakReference<Activity> mActivity;
-        private WeakReference<PhotoFragment> mPhotoFragment;
-        private OnFragmentInteractionListener mCallback;
+        private WeakReference<Activity> activity;
+        private WeakReference<PhotoFragment> photoFragment;
+        private OnFragmentInteractionListener callback;
 
         public PictureCallback(Activity activity, PhotoFragment photoFragment) {
-            mActivity = new WeakReference<>(activity);
-            mPhotoFragment = new WeakReference<>(photoFragment);
+            this.activity = new WeakReference<>(activity);
+            this.photoFragment = new WeakReference<>(photoFragment);
             try {
-                mCallback = (OnFragmentInteractionListener) mActivity.get();
+                callback = (OnFragmentInteractionListener) this.activity.get();
             } catch (ClassCastException e) {
-                throw new ClassCastException(mActivity.get().toString() + " must implement OnCaptureListener");
+                throw new ClassCastException(this.activity.get().toString() + " must implement OnCaptureListener");
             }
         }
 
         @Override public void onPictureTaken(byte[] data, Camera camera) {
             if (Constants.IS_DEBUG)
                 Log.d(TAG, "onPictureTaken called! saving into file is about to start");
-            if (mUrl.isEmpty()) return;
+            if (url.isEmpty()) return;
 
             Observable.create(subscriber -> {
-                Util.save(mActivity.get(), data, sFrontBack, mUrl, Constants.DISPLAY_ORIENTATION);
+                Util.save(activity.get(), data, frontBack, url, Constants.DISPLAY_ORIENTATION);
                 subscriber.onCompleted();
-            }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPhotoFragment.get());
+            }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(photoFragment.get());
 
-            mCallback.switchFragmentTo(sFrontBack);
+            callback.switchFragmentTo(frontBack);
         }
     }
 }

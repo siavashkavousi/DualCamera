@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_photo_fragment"
+            android:title="@string/photo_fragment"/>
+        <item
+            android:id="@+id/nav_share_fragment"
+            android:icon="@android:drawable/ic_menu_gallery"
+            android:title="@string/share_fragment"/>
+        <item
+            android:id="@+id/nav_about_fragment"
+            android:icon="@android:drawable/ic_btn_speak_now"
+            android:title="@string/about_fragment"/>
+    </group>
+
+</menu>

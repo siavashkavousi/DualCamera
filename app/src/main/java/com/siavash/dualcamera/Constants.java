@@ -6,12 +6,12 @@ package com.siavash.dualcamera;
  */
 public class Constants {
     //region Camera specific constants
-    public static final String IMAGE_URL = "image_url";
+    public static final String CAMERA_BOTH_IMAGE_URL = "camera_both_url";
     public static final String CAMERA_FRONT_IMAGE_URL = "camera_front_url";
     public static final String CAMERA_BACK_IMAGE_URL = "camera_back_url";
     public static final int DISPLAY_ORIENTATION = 90;
     public static final int COMPRESS_QUALITY = 90;
-    public static final int CONTAINER_RES_ID = R.id.container;
+    public static final String IMAGE_PATH = "image_url";
     //endregion
 
     //region Fragments

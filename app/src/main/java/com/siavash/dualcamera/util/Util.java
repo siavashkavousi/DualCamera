@@ -11,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.siavash.dualcamera.ApplicationBase;
 import com.siavash.dualcamera.Constants;
@@ -31,6 +30,13 @@ import java.util.Date;
  */
 public class Util {
     private static final String TAG = Util.class.getSimpleName();
+
+    public static <T> T checkNotNull(T value, String message) {
+        if (value == null) {
+            throw new NullPointerException(message);
+        }
+        return value;
+    }
 
     @NonNull public static File getFile(String url) {
         File file = new File(url);
@@ -66,10 +72,10 @@ public class Util {
         return new File(imageDir.getPath() + File.separator + name + ".jpg");
     }
 
-    public static String save(Context context, View view) {
+    public static String save(View view, File file) {
         view.setDrawingCacheEnabled(true);
         Bitmap bitmap = view.getDrawingCache();
-        String imageUrl = Util.save(context, bitmap, Util.setFile(Constants.IMAGE_URL));
+        String imageUrl = Util.save(bitmap, file);
         view.setDrawingCacheEnabled(false);
         return imageUrl;
     }
@@ -77,14 +83,12 @@ public class Util {
     /**
      * Saves bitmap into storage
      *
-     * @param context    context of the related activity
      * @param bitmap     target bitmap
      * @param targetFile target file in order to save bitmap into it
      * @return absolute path to the saved bitmap
      */
-    @Nullable public static String save(final Context context, final Bitmap bitmap, final File targetFile) {
+    @Nullable public static String save(Bitmap bitmap, File targetFile) {
         if (targetFile == null) {
-            Toast.makeText(context, "Image retrieval failed.", Toast.LENGTH_SHORT).show();
             return null;
         }
         FileOutputStream fos = null;

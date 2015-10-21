@@ -1,6 +1,5 @@
 package com.siavash.dualcamera.fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,9 +19,9 @@ import android.widget.Toast;
 
 import com.siavash.dualcamera.Constants;
 import com.siavash.dualcamera.R;
+import com.siavash.dualcamera.activities.PhotoActivity;
 import com.siavash.dualcamera.util.StringUtil;
 import com.siavash.dualcamera.util.Util;
-import com.siavash.dualcamera.util.customviews.Toolbar;
 
 import java.io.File;
 import java.util.List;
@@ -34,36 +33,21 @@ import butterknife.ButterKnife;
  * Share or save photos to file
  * Created by siavash on 3/6/2015.
  */
-public class ShareFragment extends Fragment implements Toolbar.OnBackClickListener {
-
+public class ShareFragment extends Fragment {
     private static final String TAG = ShareFragment.class.getSimpleName();
 
-    @Bind(R.id.toolbar) Toolbar<ShareFragment> toolbar;
     @Bind({R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more}) List<Button> socialNetworks;
     @Bind(R.id.share_to) TextView shareTextView;
     @Bind(R.id.photo_container) ImageView image;
 
-    private OnFragmentInteractionListener mCallback;
-    private String mImageUrl;
-
-    private ShareFragment() {
-    }
+    private String imageUrl;
 
     public static ShareFragment newInstance(String imageUrl) {
         ShareFragment shareFragment = new ShareFragment();
         Bundle args = new Bundle();
-        args.putString(Constants.IMAGE_URL, imageUrl);
+        args.putString(Constants.IMAGE_PATH, imageUrl);
         shareFragment.setArguments(args);
         return shareFragment;
-    }
-
-    @Override public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallback = (OnFragmentInteractionListener) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -74,27 +58,27 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
         int imageWidth = metrics.widthPixels;
         int imageHeight = metrics.heightPixels;
 
-        mImageUrl = getArguments().getString(Constants.IMAGE_URL);
-        Bitmap bitmap = Util.decodeSampledBitmap(Util.getFile(mImageUrl), imageWidth, imageHeight);
+        imageUrl = getArguments().getString(Constants.IMAGE_PATH);
+        Bitmap bitmap = Util.decodeSampledBitmap(Util.getFile(imageUrl), imageWidth, imageHeight);
         image.setImageBitmap(bitmap);
     }
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_share, container, false);
         ButterKnife.bind(this, view);
-        // Set up toolbar
-        toolbar.setTitle("اشتراک گذاری");
-        toolbar.setCallback(this);
+
+        if (getActivity() instanceof PhotoActivity){
+            ((PhotoActivity) getActivity()).setToolbarTitle("اشتراک گذاری");
+        }
 
         setTypefaces();
         setListeners();
-
         return view;
     }
 
-    private void setTypefaces(){
+    private void setTypefaces() {
         shareTextView.setTypeface(StringUtil.getFont(getActivity(), StringUtil.FONT_AFSANEH));
-        for (Button button : socialNetworks){
+        for (Button button : socialNetworks) {
             button.setTypeface(StringUtil.getFont(getActivity(), StringUtil.FONT_NAZANIN_BOLD));
         }
     }
@@ -112,7 +96,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
     private void shareIntent(String intentName, String socialName) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("image/jpg");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(mImageUrl)));
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(imageUrl)));
         generateCustomIntent(intent, intentName, socialName);
     }
 
@@ -136,12 +120,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
         }
     }
 
-    @Override public void goBack() {
-        getActivity().onBackPressed();
-    }
-
     private class OnClickListener implements View.OnClickListener {
-
         @Override
         public void onClick(View v) {
             int id = v.getId();
@@ -158,7 +137,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
             } else if (id == socialNetworks.get(5).getId()) {
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("image/jpg");
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(mImageUrl)));
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(imageUrl)));
                 startActivity(intent);
             }
         }

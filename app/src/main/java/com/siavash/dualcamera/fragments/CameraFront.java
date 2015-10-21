@@ -40,13 +40,13 @@ public class CameraFront extends CameraBase {
     protected boolean safeCameraOpenInView(ViewGroup viewLayout) {
         boolean qOpened;
         releaseCameraAndPreview();
-        mCamera = getCameraInstance(CAMERA_ID);
-        qOpened = (mCamera != null);
+        camera = getCameraInstance(CAMERA_ID);
+        qOpened = (camera != null);
 
         if (qOpened) {
-            mPreview = new CameraPreview(getActivity(), mCamera, viewLayout);
-            viewLayout.addView(mPreview);
-            mPreview.startCameraPreview();
+            preview = new CameraPreview(getActivity(), camera, viewLayout);
+            viewLayout.addView(preview);
+            preview.startCameraPreview();
         }
         return qOpened;
     }

@@ -2,6 +2,7 @@ package com.siavash.dualcamera.activities;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,7 +14,6 @@ import com.siavash.dualcamera.fragments.CameraBase;
 import com.siavash.dualcamera.fragments.CameraFront;
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener;
 import com.siavash.dualcamera.fragments.PhotoFragment;
-import com.siavash.dualcamera.fragments.ShareFragment;
 import com.siavash.dualcamera.util.FragmentUtil;
 
 import butterknife.ButterKnife;
@@ -28,9 +28,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         ButterKnife.bind(this);
 
         mPhotoFragment = PhotoFragment.getInstance();
-
-        CameraBase cameraFront = new CameraFront(mPhotoFragment);
-        FragmentUtil.replaceFragment(getFragmentManager(), Constants.CONTAINER_RES_ID, cameraFront);
+        switchFragmentTo(Constants.CAMERA_FRONT_FRAGMENT);
     }
 
     @Override public void switchFragmentTo(int index, String... optionalValues) {
@@ -38,19 +36,21 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         switch (index) {
             case Constants.CAMERA_FRONT_FRAGMENT:
                 CameraBase cameraFront = new CameraFront(mPhotoFragment);
-                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraFront);
+                FragmentUtil.replaceFragment(fragmentManager, R.id.container, cameraFront);
                 break;
             case Constants.CAMERA_BACK_FRAGMENT:
                 CameraBase cameraBack = new CameraBack(mPhotoFragment);
-                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, cameraBack);
+                FragmentUtil.replaceFragment(fragmentManager, R.id.container, cameraBack);
                 break;
             case Constants.PHOTO_FRAGMENT:
-                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT_TAG);
+                Intent intent = new Intent(this, PhotoActivity.class);
+                startActivity(intent);
+//                FragmentUtil.replaceFragment(fragmentManager, Constants.CONTAINER_RES_ID, mPhotoFragment, Constants.PHOTO_FRAGMENT_TAG);
                 break;
-            case Constants.SHARE_FRAGMENT:
-                ShareFragment shareFragment = ShareFragment.newInstance(optionalValues[0]);
-                FragmentUtil.addFragment(fragmentManager, Constants.CONTAINER_RES_ID, shareFragment, R.anim.slide_in_bottom, 0, 0, R.anim.slide_out_bottom);
-                break;
+//            case Constants.SHARE_FRAGMENT:
+//                ShareFragment shareFragment = ShareFragment.newInstance(optionalValues[0]);
+//                FragmentUtil.addFragment(fragmentManager, Constants.CONTAINER_RES_ID, shareFragment, R.anim.slide_in_bottom, 0, 0, R.anim.slide_out_bottom);
+//                break;
         }
     }
 
