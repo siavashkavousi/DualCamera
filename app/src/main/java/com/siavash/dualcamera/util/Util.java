@@ -25,12 +25,6 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.schedulers.Schedulers;
-
 /**
  * Utility for saving, loading, rotating, resizing and ... of bitmaps
  * Created by sia on 8/18/15.
@@ -41,14 +35,14 @@ public class Util {
     @NonNull public static File getFile(String url) {
         File file = new File(url);
         if (!file.exists())
-            throw new NullPointerException("requested file does not exist in the underlying system");
+            throw new NullPointerException("Requested file does not exist in the underlying system");
         return file;
     }
 
     @NonNull public static File getCacheFile(Context context, String url) {
         File file = new File(context.getCacheDir(), url);
         if (!file.exists())
-            throw new NullPointerException("requested file does not exist in the underlying system");
+            throw new NullPointerException("Requested file does not exist in the underlying system");
         return file;
     }
 
@@ -72,16 +66,12 @@ public class Util {
         return new File(imageDir.getPath() + File.separator + name + ".jpg");
     }
 
-    public static String saveAsync(Context context, View view) {
+    public static String save(Context context, View view) {
         view.setDrawingCacheEnabled(true);
         Bitmap bitmap = view.getDrawingCache();
-        String imageUrl = Util.saveAsync(context, bitmap, Util.setFile(Constants.IMAGE_URL));
+        String imageUrl = Util.save(context, bitmap, Util.setFile(Constants.IMAGE_URL));
         view.setDrawingCacheEnabled(false);
         return imageUrl;
-    }
-
-    @Nullable public static String saveAsync(Context context, final Bitmap bitmap, final File targetFile) {
-        return saveAsync(context, bitmap, targetFile, null);
     }
 
     /**
@@ -92,37 +82,20 @@ public class Util {
      * @param targetFile target file in order to save bitmap into it
      * @return absolute path to the saved bitmap
      */
-    @Nullable public static <T extends Observer> String saveAsync(final Context context, final Bitmap bitmap, final File targetFile, T observer) {
+    @Nullable public static String save(final Context context, final Bitmap bitmap, final File targetFile) {
         if (targetFile == null) {
             Toast.makeText(context, "Image retrieval failed.", Toast.LENGTH_SHORT).show();
             return null;
         }
-        Observable observable = Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override public void call(Subscriber<? super Void> subscriber) {
-                FileOutputStream fos = null;
-                try {
-                    fos = new FileOutputStream(targetFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
-            }
-        });
-
-        Subscription subscription;
-        if (observer != null) {
-            subscription = observable.subscribe(observer);
-        } else {
-            subscription = observable.subscribe();
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(targetFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        ApplicationBase.getRefWatcher(context).watch(subscription);
 
+        bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
         return targetFile.getAbsolutePath();
-    }
-
-    public static void saveAsync(Context context, byte[] data, int frontBack, String url, int orientation) {
-        saveAsync(context, data, frontBack, url, orientation, null);
     }
 
     /**
@@ -133,25 +106,7 @@ public class Util {
      * @param url         place to save in cache folder
      * @param orientation orientation of the taken photo
      */
-    public static <T extends Observer> void saveAsync(final Context context, final byte[] data, final int frontBack, final String url, final int orientation, T observer) {
-        Observable observable = Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override public void call(Subscriber<? super Void> subscriber) {
-                saveSync(context, data, frontBack, url, orientation);
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.computation());
-
-        Subscription subscription;
-        if (observer != null) {
-            subscription = observable.subscribe(observer);
-        } else {
-            subscription = observable.subscribe();
-        }
-
-        ApplicationBase.getRefWatcher(context).watch(subscription);
-    }
-
-    public static void saveSync(final Context context, final byte[] data, final int frontBack, String url, final int orientation) {
+    public static void save(final Context context, final byte[] data, final int frontBack, String url, final int orientation) {
         long time = System.currentTimeMillis();
         File file = new File(context.getCacheDir(), url);
         FileOutputStream fos = null;
@@ -170,9 +125,10 @@ public class Util {
         }
 
         Matrix matrix = new Matrix();
-        changeOrientation(bitmap, matrix, frontBack, orientation);
-        bitmap = bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        if (isOrientationChangeNeeded(orientation))
+            changeOrientation(bitmap, matrix, frontBack, orientation);
 
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESS_QUALITY, fos);
         bitmap.recycle();
         if (Constants.IS_DEBUG)
@@ -184,19 +140,17 @@ public class Util {
     }
 
     public static void changeOrientation(Bitmap bitmap, Matrix matrix, int frontBack, int orientation) {
-        if (isOrientationChangeNeeded(orientation)) {
-            if (frontBack == Constants.CAMERA_BACK_FRAGMENT) {
-                if (bitmap.getWidth() < bitmap.getHeight()) {
-                    matrix.postRotate(orientation);
-                } else {
-                    matrix.postRotate(-orientation);
-                }
-            } else if (frontBack == Constants.PHOTO_FRAGMENT) {
-                if (bitmap.getWidth() > bitmap.getHeight()) {
-                    matrix.postRotate(orientation);
-                } else {
-                    matrix.postRotate(-orientation);
-                }
+        if (frontBack == Constants.CAMERA_BACK_FRAGMENT) {
+            if (bitmap.getWidth() < bitmap.getHeight()) {
+                matrix.postRotate(orientation);
+            } else {
+                matrix.postRotate(-orientation);
+            }
+        } else if (frontBack == Constants.PHOTO_FRAGMENT) {
+            if (bitmap.getWidth() > bitmap.getHeight()) {
+                matrix.postRotate(orientation);
+            } else {
+                matrix.postRotate(-orientation);
             }
         }
     }
@@ -294,24 +248,20 @@ public class Util {
         return metrics;
     }
 
-    public static void copyAsync(final File src, final File dst) {
-        Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override public void call(Subscriber<? super Void> subscriber) {
-                try {
-                    long time = System.currentTimeMillis();
-                    FileInputStream inStream = new FileInputStream(src);
-                    FileOutputStream outStream = new FileOutputStream(dst);
-                    FileChannel inChannel = inStream.getChannel();
-                    FileChannel outChannel = outStream.getChannel();
-                    inChannel.transferTo(0, inChannel.size(), outChannel);
-                    inStream.close();
-                    outStream.close();
-                    if (Constants.IS_DEBUG)
-                        Log.d(TAG, "Time to copy: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).subscribeOn(Schedulers.computation()).subscribe();
+    public static void copy(final File src, final File dst) {
+        try {
+            long time = System.currentTimeMillis();
+            FileInputStream inStream = new FileInputStream(src);
+            FileOutputStream outStream = new FileOutputStream(dst);
+            FileChannel inChannel = inStream.getChannel();
+            FileChannel outChannel = outStream.getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            inStream.close();
+            outStream.close();
+            if (Constants.IS_DEBUG)
+                Log.d(TAG, "Time to copy: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

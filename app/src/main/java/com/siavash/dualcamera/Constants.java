@@ -23,5 +23,5 @@ public class Constants {
     public static final String PHOTO_FRAGMENT_TAG = "photoFragment";
     //endregion
 
-    public static final boolean IS_DEBUG = false;
+    public static final boolean IS_DEBUG = true;
 }

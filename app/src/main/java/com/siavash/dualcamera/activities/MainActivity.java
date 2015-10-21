@@ -1,4 +1,4 @@
-package com.siavash.dualcamera;
+package com.siavash.dualcamera.activities;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -6,17 +6,19 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.siavash.dualcamera.Constants;
+import com.siavash.dualcamera.R;
 import com.siavash.dualcamera.fragments.CameraBack;
 import com.siavash.dualcamera.fragments.CameraBase;
 import com.siavash.dualcamera.fragments.CameraFront;
-import com.siavash.dualcamera.fragments.OnFragmentChange;
+import com.siavash.dualcamera.fragments.OnFragmentInteractionListener;
 import com.siavash.dualcamera.fragments.PhotoFragment;
 import com.siavash.dualcamera.fragments.ShareFragment;
 import com.siavash.dualcamera.util.FragmentUtil;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements OnFragmentChange {
+public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private PhotoFragment mPhotoFragment;
 

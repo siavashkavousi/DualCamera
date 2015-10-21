@@ -43,7 +43,7 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
     @Bind(R.id.share_to) TextView shareTextView;
     @Bind(R.id.photo_container) ImageView image;
 
-    private OnFragmentChange mCallback;
+    private OnFragmentInteractionListener mCallback;
     private String mImageUrl;
 
     private ShareFragment() {
@@ -60,9 +60,9 @@ public class ShareFragment extends Fragment implements Toolbar.OnBackClickListen
     @Override public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mCallback = (OnFragmentChange) getActivity();
+            mCallback = (OnFragmentInteractionListener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnFragmentChange");
+            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 

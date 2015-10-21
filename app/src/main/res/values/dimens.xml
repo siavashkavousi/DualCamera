@@ -5,6 +5,7 @@
     <dimen name="shutter_offset">-30dp</dimen>
     <dimen name="toolbar_height">56dp</dimen>
     <dimen name="share_btn_width">170dp</dimen>
+    <dimen name="corner_radius">10dp</dimen>
 
     <dimen name="space_low">5dp</dimen>
     <dimen name="space_medium">10dp</dimen>

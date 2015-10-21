@@ -13,6 +13,10 @@ import com.siavash.dualcamera.util.Util;
 
 import java.lang.ref.WeakReference;
 
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 
 /**
  * Parent class for camera controllers
@@ -94,13 +98,13 @@ public abstract class CameraBase extends Fragment {
     private static class PictureCallback implements Camera.PictureCallback {
         private WeakReference<Activity> mActivity;
         private WeakReference<PhotoFragment> mPhotoFragment;
-        private OnFragmentChange mCallback;
+        private OnFragmentInteractionListener mCallback;
 
         public PictureCallback(Activity activity, PhotoFragment photoFragment) {
             mActivity = new WeakReference<>(activity);
             mPhotoFragment = new WeakReference<>(photoFragment);
             try {
-                mCallback = (OnFragmentChange) mActivity.get();
+                mCallback = (OnFragmentInteractionListener) mActivity.get();
             } catch (ClassCastException e) {
                 throw new ClassCastException(mActivity.get().toString() + " must implement OnCaptureListener");
             }
@@ -111,7 +115,11 @@ public abstract class CameraBase extends Fragment {
                 Log.d(TAG, "onPictureTaken called! saving into file is about to start");
             if (mUrl.isEmpty()) return;
 
-            Util.saveAsync(mActivity.get(), data, sFrontBack, mUrl, Constants.DISPLAY_ORIENTATION, mPhotoFragment.get());
+            Observable.create(subscriber -> {
+                Util.save(mActivity.get(), data, sFrontBack, mUrl, Constants.DISPLAY_ORIENTATION);
+                subscriber.onCompleted();
+            }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPhotoFragment.get());
+
             mCallback.switchFragmentTo(sFrontBack);
         }
     }
