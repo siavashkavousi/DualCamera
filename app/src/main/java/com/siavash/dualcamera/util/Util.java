@@ -263,7 +263,7 @@ public class Util {
             inStream.close();
             outStream.close();
             if (Constants.IS_DEBUG)
-                Log.d(TAG, "Time to copy: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
+                Log.d(TAG, "Time to com.siavash.dualcamera.util.copy: " + String.valueOf(System.currentTimeMillis() - time) + " - in the thread: " + Thread.currentThread().toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

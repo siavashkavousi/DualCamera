@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -15,10 +14,9 @@
         android:gravity="end"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            xmlns:android="http://schemas.android.com/apk/res/android"
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_size"
             android:background="@color/primary"
@@ -40,7 +38,7 @@
                     android:layout_centerVertical="true"
                     android:background="@null"
                     android:padding="8dp"
-                    android:src="@drawable/ic_hamburger"/>
+                    android:src="@drawable/ic_hamburger" />
 
                 <TextView
                     android:id="@+id/toolbar_title"
@@ -51,7 +49,19 @@
                     android:layout_toStartOf="@+id/toolbar_hamburger"
                     android:text="@string/app_name"
                     android:textColor="@android:color/white"
-                    android:textSize="20sp"/>
+                    android:textSize="20sp" />
+
+                <ImageButton
+                    android:id="@+id/toolbar_action"
+                    android:layout_width="@dimen/toolbar_size"
+                    android:layout_height="@dimen/toolbar_size"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_save"
+                    android:visibility="gone" />
 
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
@@ -61,6 +71,6 @@
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 </LinearLayout>

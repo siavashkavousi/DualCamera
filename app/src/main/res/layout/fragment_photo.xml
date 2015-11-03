@@ -1,59 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
-    android:id="@+id/scroll_view"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_dark"
     android:descendantFocusability="afterDescendants"
     android:fillViewport="true">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <com.siavash.dualcamera.util.customviews.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/space_medium"/>
+        android:layout_height="wrap_content">
 
         <RelativeLayout
+            android:id="@+id/photo_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
 
-            <RelativeLayout
-                android:id="@+id/photo_layout"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/photo_back"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true">
+                android:layout_centerInParent="true"
+                android:adjustViewBounds="true"
+                tools:ignore="contentDescription" />
 
-                <ImageView
-                    android:id="@+id/photo_back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:adjustViewBounds="true"
-                    tools:ignore="contentDescription"/>
+            <com.siavash.dualcamera.util.customviews.RoundedImageView
+                android:id="@+id/photo_front"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:paddingBottom="8dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="8dp"
+                android:paddingStart="4dp"
+                android:paddingTop="4dp"
+                tools:ignore="contentDescription" />
 
-                <com.siavash.dualcamera.util.customviews.RoundedImageView
-                    android:id="@+id/photo_front"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:paddingBottom="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="8dp"
-                    android:paddingStart="4dp"
-                    android:paddingTop="4dp"
-                    tools:ignore="contentDescription"/>
-
-            </RelativeLayout>
         </RelativeLayout>
+    </RelativeLayout>
 
-    </LinearLayout>
 </ScrollView>

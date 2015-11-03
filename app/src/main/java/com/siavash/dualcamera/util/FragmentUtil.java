@@ -18,6 +18,7 @@ public class FragmentUtil {
 
     public static void addFragment(FragmentManager fragmentManager, int container, Fragment fragment, int animEnter, int animExit, int animPopEnter, int animPopExit) {
         addFragment(fragmentManager, container, fragment, null, animEnter, animExit, animPopEnter, animPopExit);
+
     }
 
     public static void addFragment(FragmentManager fragmentManager, int container, Fragment fragment, String tag, int animEnter, int animExit, int animPopEnter, int animPopExit) {
