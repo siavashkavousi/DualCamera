@@ -8,7 +8,7 @@ enum class FragmentId {
 }
 
 enum class CameraId(val address: String, val id: Int) {
-    BACK("back", 0), FRONT("front", 1)
+    BACK(".back", 0), FRONT(".front", 1)
 }
 
 enum class OnTouchAction {

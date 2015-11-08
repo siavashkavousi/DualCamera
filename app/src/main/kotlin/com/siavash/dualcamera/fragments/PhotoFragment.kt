@@ -1,13 +1,12 @@
 package com.siavash.dualcamera.fragments
 
-import android.app.Fragment
 import android.app.ProgressDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.graphics.Point
 import android.graphics.PointF
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -17,7 +16,9 @@ import android.widget.RelativeLayout
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.activities.PhotoActivity
 import com.siavash.dualcamera.util.*
-import org.jetbrains.anko.*
+import org.jetbrains.anko.act
+import org.jetbrains.anko.info
+import org.jetbrains.anko.onClick
 import java.io.File
 import kotlin.concurrent.currentThread
 
@@ -25,14 +26,16 @@ import kotlin.concurrent.currentThread
  * Editing photos before saving into file or sharing with others
  * Created by sia on 8/18/15.
  */
-class PhotoFragment : Fragment(), AnkoLogger {
+class PhotoFragment : BaseFragment() {
     val photoLayout: RelativeLayout by bindView(R.id.photo_layout)
     val backImageView: ImageView by bindView(R.id.photo_back)
     val frontImageView: ImageView by bindView(R.id.photo_front)
     val progressDialog: ProgressDialog by lazy { ProgressDialog.show(act as Context, "در حال بارگذاری", "در حال بارگذاری عکس ها", true, true) }
 
-    var frontBitmap: Bitmap? = null
-    var backBitmap: Bitmap? = null
+    lateinit var frontBitmap: Bitmap
+    lateinit var backBitmap: Bitmap
+    lateinit var imageUrl: String
+    lateinit var displaySize: Point
     val callback: OnFragmentInteractionListener by lazy { act as OnFragmentInteractionListener }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -42,43 +45,44 @@ class PhotoFragment : Fragment(), AnkoLogger {
             pact.toolbarTitle.text = "ویرایش عکس"
             pact.toolbarAction.visibility = View.VISIBLE
             pact.toolbarAction.onClick {
-                val imageUrl = pact.toolbarAction.saveBitmap(getOutputMediaFile())
                 callback.switchFragmentTo(FragmentId.SHARE, imageUrl)
             }
         }
         progressDialog.show()
         loadPhotos()
-
+        displaySize = getDisplaySize(act)
         return view
     }
 
     private fun loadPhotos() {
-        debug("load photos")
-//        async {
-        Thread(Runnable {
-            debug("thread : " + currentThread)
-            val metrics = DisplayMetrics()
-            act.windowManager.defaultDisplay.getMetrics(metrics)
-            doneSignal.await()
-            debug("done signal " + doneSignal.count)
-            frontBitmap = Util.decodeSampledBitmap(File(ctx.cacheDir, CameraId.FRONT.address), metrics.widthPixels / 4, metrics.heightPixels / 4)
-            backBitmap = Util.decodeSampledBitmap(File(ctx.cacheDir, CameraId.BACK.address), metrics.widthPixels, metrics.heightPixels)
-            photoLayout.saveBitmap(File(act.cacheDir, dualPhotoUrl))
-            setPhotosToImageView()
-        }).start()
-
-//        }
+        executor.execute {
+            info("thread id: " + currentThread)
+            countDownLatch.await()
+            loadBitmaps(displaySize.x, displaySize.y)
+            setImageViews()
+        }
     }
 
-    private fun setPhotosToImageView() {
+    private fun loadBitmaps(width: Int, height: Int) {
+        frontBitmap = Util.decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.FRONT.address), width / 4, height / 4)
+        backBitmap = Util.decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.BACK.address), width, height)
+    }
+
+    private fun setImageViews() {
         frontImageView.post {
             frontImageView.y = 200f
             frontImageView.setImageBitmap(frontBitmap)
             frontImageView.setOnTouchListener(OnTouchListener())
         }
         backImageView.post { backImageView.setImageBitmap(backBitmap) }
-
+        imageUrl = photoLayout.saveBitmap(File(getExternalApplicationStorage(), dualImageUrl))
         progressDialog.dismiss()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        frontBitmap.recycle()
+        backBitmap.recycle()
     }
 
     private inner class OnTouchListener : View.OnTouchListener {

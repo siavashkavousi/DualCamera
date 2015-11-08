@@ -1,11 +1,10 @@
 package com.siavash.dualcamera.fragments
 
-import android.app.Fragment
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.graphics.Point
 import android.hardware.Camera
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,25 +13,24 @@ import android.widget.ImageButton
 import com.siavash.dualcamera.Constants
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.CameraPreview
-import com.siavash.dualcamera.util.CameraId
-import com.siavash.dualcamera.util.FragmentId
-import com.siavash.dualcamera.util.decodeSampledBitmap
-import com.siavash.dualcamera.util.doneSignal
+import com.siavash.dualcamera.util.*
 import org.jetbrains.anko.act
-import org.jetbrains.anko.ctx
 import org.jetbrains.anko.find
+import org.jetbrains.anko.info
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.concurrent.currentThread
 
 /**
  * Parent class for camera controllers
  * Created by sia on 8/14/15.
  */
-class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : Fragment() {
+class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : BaseFragment() {
     var camera: Camera? = null
     var preview: CameraPreview? = null
-    var frameLayout: FrameLayout? = null
-    var shutter: ImageButton? = null
+    lateinit var frameLayout: FrameLayout
+    lateinit var shutter: ImageButton
+    lateinit var displaySize: Point
     val callback: OnFragmentInteractionListener by lazy { act as OnFragmentInteractionListener }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -40,7 +38,8 @@ class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : F
         frameLayout = view.find<FrameLayout>(R.id.container)
         shutter = view.find<ImageButton>(R.id.shutter_btn)
         safeCameraOpenInView()
-        shutter?.setOnClickListener { takePicture() }
+        shutter.setOnClickListener { takePicture() }
+        displaySize = getDisplaySize(act)
         return view
     }
 
@@ -52,47 +51,37 @@ class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : F
 
         if (qOpened) {
             preview = CameraPreview(activity, camera, frameLayout)
-            frameLayout?.addView(preview)
+            frameLayout.addView(preview)
             preview?.startCameraPreview()
         }
         return qOpened
     }
 
     private fun getCameraInstance(id: Int): Camera? {
-        var c: Camera? = null
-        try {
-            c = Camera.open(id) // attempt to get a Camera instance
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        return c // returns null if camera is unavailable
+        return Camera.open(id)
     }
 
     private fun releaseCameraAndPreview() {
-        if (camera != null) {
-            camera?.stopPreview()
-            camera?.release()
-            camera = null
-        }
-        if (preview != null) {
-            preview?.destroyDrawingCache()
-            preview?.camera = null
-        }
+        camera?.stopPreview()
+        camera?.release()
+        camera = null
+        preview?.destroyDrawingCache()
+        preview?.camera = null
     }
 
     private fun takePicture() {
-        camera?.takePicture(null,null, Camera.PictureCallback() { data, camera ->
-            Thread(Runnable {
+        camera?.takePicture(null, null, Camera.PictureCallback() { data, camera ->
+            executor.execute {
+                info("thread id: " + currentThread)
                 saveBitmap(data, cameraId)
-                doneSignal.countDown()
-            }).start()
+                countDownLatch.countDown()
+            }
             callback.switchFragmentTo(nextFragmentId)
         })
     }
 
     private fun saveBitmap(data: ByteArray, cameraId: CameraId, orientation: Int = 90) {
-        var fos = FileOutputStream(File(ctx.cacheDir, cameraId.address))
+        val fos = FileOutputStream(File(getExternalApplicationStorage(), cameraId.address))
         var bitmap = decodeBitmapOnCameraId(data, cameraId)
 
         val matrix = Matrix()
@@ -104,13 +93,11 @@ class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : F
     }
 
     private fun decodeBitmapOnCameraId(data: ByteArray, cameraId: CameraId): Bitmap {
-        val metrics = DisplayMetrics()
-        activity.windowManager.defaultDisplay.getMetrics(metrics)
         var bitmap: Bitmap
         if (cameraId == CameraId.FRONT) {
-            bitmap = decodeSampledBitmap(data, metrics.widthPixels / 4, metrics.heightPixels / 4)
+            bitmap = decodeSampledBitmap(data, displaySize.x / 4, displaySize.y / 4)
         } else {
-            bitmap = decodeSampledBitmap(data, metrics.widthPixels, metrics.heightPixels)
+            bitmap = decodeSampledBitmap(data, displaySize.x, displaySize.y)
         }
         return bitmap
     }
@@ -135,8 +122,8 @@ class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : F
         }
     }
 
-    override fun onDetach() {
+    override fun onStop() {
         releaseCameraAndPreview()
-        super.onDetach()
+        super.onStop()
     }
 }

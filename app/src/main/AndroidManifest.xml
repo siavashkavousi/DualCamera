@@ -14,6 +14,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
+        android:supportsRtl="true"
         android:name=".ApplicationBase"
         android:allowBackup="true"
         android:fullBackupContent="true"

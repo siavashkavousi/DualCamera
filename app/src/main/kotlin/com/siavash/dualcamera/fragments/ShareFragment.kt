@@ -22,7 +22,7 @@ import java.io.File
 /**
  * Created by sia on 11/2/15.
  */
-class ShareFragment : Fragment() {
+class ShareFragment : BaseFragment() {
     val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
     val shareText: TextView by bindView(R.id.share_to)
     val image: ImageView by bindView(R.id.photo_container)
@@ -42,8 +42,10 @@ class ShareFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_share, container, false)
         (act as PhotoActivity).toolbarTitle.text = "اشتراک گذاری"
 
-        setTypefaces()
-        setListeners()
+        lazy {
+            setTypefaces()
+            setListeners()
+        }
         return view
     }
 

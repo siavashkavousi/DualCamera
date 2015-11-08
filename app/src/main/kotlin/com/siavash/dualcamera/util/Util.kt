@@ -1,9 +1,13 @@
 package com.siavash.dualcamera.util
 
+import android.app.Activity
+import android.app.Application
 import android.app.Fragment
 import android.app.FragmentManager
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Point
 import android.os.Environment
 import android.view.View
 import com.siavash.dualcamera.ApplicationBase
@@ -13,13 +17,30 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 internal val orientation = 90
 internal val compressQuality = 90
-internal val dualPhotoUrl = "dualPhotoUrl"
+internal val dualImageUrl = ".dualImageUrl"
 internal val finalImageUrl = "imageUrl"
-internal val doneSignal = CountDownLatch(2)
+internal val countDownLatch = ResettableCountDownLatch(2)
+internal val executor = Executors.newFixedThreadPool(3)
+
+internal fun getAppName(): String {
+    val app = Application()
+    return app.packageManager.getApplicationLabel(app.packageManager.getApplicationInfo(app.packageName, PackageManager.SIGNATURE_MATCH)) as String
+}
+
+internal fun getExternalApplicationStorage(): String {
+    return getExternalStorageDirectoryPath("DualCamera")
+}
+
+internal fun getExternalStorageDirectoryPath(appName: String): String {
+    val file = File(Environment.getExternalStorageDirectory(), appName)
+    if (!file.exists() && !file.mkdirs()) throw NullPointerException("File directory not found")
+
+    return file.absolutePath
+}
 
 internal fun getOutputMediaFile(): File {
     val mediaStorageDir = File(Environment.getExternalStoragePublicDirectory(
@@ -38,7 +59,7 @@ internal fun getOutputMediaFile(): File {
 internal fun View.saveBitmap(file: File): String {
     this.isDrawingCacheEnabled = true
     val bitmap = this.drawingCache
-    val imageUrl = Util.encodeBitmap(file)
+    val imageUrl = bitmap.encodeBitmap(file)
     this.isDrawingCacheEnabled = false
     return imageUrl
 }
@@ -159,16 +180,22 @@ internal fun File.copy(src: File, dst: File) {
     }
 }
 
-internal fun addFragment(fragmentManager: FragmentManager, container: Int, fragment: Fragment, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0, tag: String? = null) {
-    fragmentManager.beginTransaction()
+internal fun getDisplaySize(activity: Activity): Point {
+    val p = Point()
+    activity.windowManager.defaultDisplay.getSize(p)
+    return p
+}
+
+internal fun FragmentManager.addFragment(container: Int, fragment: Fragment, tag: String? = null, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0) {
+    this.beginTransaction()
             .setCustomAnimations(animEnter, animExit, animPopEnter, animPopExit)
             .add(container, fragment, tag)
             .addToBackStack(null)
             .commit()
 }
 
-internal fun replaceFragment(fragmentManager: FragmentManager, container: Int, fragment: Fragment, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0, tag: String? = null) {
-    fragmentManager.beginTransaction()
+internal fun FragmentManager.replaceFragment(container: Int, fragment: Fragment, tag: String? = null, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0) {
+    this.beginTransaction()
             .setCustomAnimations(animEnter, animExit, animPopEnter, animPopExit)
             .replace(container, fragment, tag)
             .commit()
