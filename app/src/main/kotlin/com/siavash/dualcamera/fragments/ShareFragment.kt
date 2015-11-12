@@ -1,11 +1,10 @@
 package com.siavash.dualcamera.fragments
 
-import android.app.Fragment
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,27 +25,21 @@ class ShareFragment : BaseFragment() {
     val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
     val shareText: TextView by bindView(R.id.share_to)
     val image: ImageView by bindView(R.id.photo_container)
-    var imageUrl: String? = null
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        val metrics = DisplayMetrics()
-        activity.windowManager.defaultDisplay.getMetrics(metrics)
-
-        imageUrl = arguments.getString(finalImageUrl)
-        val bitmap = decodeSampledBitmap(File(imageUrl), metrics.widthPixels, metrics.heightPixels)
-        image.setImageBitmap(bitmap)
-    }
+    lateinit var displaySize : Point
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_share, container, false)
         (act as PhotoActivity).toolbarTitle.text = "اشتراک گذاری"
-
-        lazy {
-            setTypefaces()
-            setListeners()
-        }
+        displaySize = getDisplaySize(act)
         return view
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        val bitmap = Util.decodeSampledBitmap(File(getExternalApplicationStorage(), finalImageUrl), displaySize.x, displaySize.y)
+        image.setImageBitmap(bitmap)
+        setTypefaces()
+        setListeners()
     }
 
     private fun setTypefaces() {
@@ -70,7 +63,7 @@ class ShareFragment : BaseFragment() {
     private fun shareIntent(intentName: String, socialName: String) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.setType("image/jpg")
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(imageUrl)))
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(getExternalApplicationStorage(), finalImageUrl)))
         generateCustomIntent(intent, intentName, socialName)
     }
 
@@ -111,7 +104,7 @@ class ShareFragment : BaseFragment() {
             } else if (id == socialNetworks[5].id) {
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.setType("image/jpg")
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(imageUrl)))
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(getExternalApplicationStorage(), finalImageUrl)))
                 startActivity(intent)
             }
         }

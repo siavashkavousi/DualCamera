@@ -2,7 +2,6 @@ package com.siavash.dualcamera.fragments
 
 import android.app.ProgressDialog
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Point
 import android.graphics.PointF
@@ -16,9 +15,7 @@ import android.widget.RelativeLayout
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.activities.PhotoActivity
 import com.siavash.dualcamera.util.*
-import org.jetbrains.anko.act
-import org.jetbrains.anko.info
-import org.jetbrains.anko.onClick
+import org.jetbrains.anko.*
 import java.io.File
 import kotlin.concurrent.currentThread
 
@@ -32,11 +29,7 @@ class PhotoFragment : BaseFragment() {
     val frontImageView: ImageView by bindView(R.id.photo_front)
     val progressDialog: ProgressDialog by lazy { ProgressDialog.show(act as Context, "در حال بارگذاری", "در حال بارگذاری عکس ها", true, true) }
 
-    lateinit var frontBitmap: Bitmap
-    lateinit var backBitmap: Bitmap
-    lateinit var imageUrl: String
     lateinit var displaySize: Point
-    val callback: OnFragmentInteractionListener by lazy { act as OnFragmentInteractionListener }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_photo, container, false)
@@ -45,44 +38,50 @@ class PhotoFragment : BaseFragment() {
             pact.toolbarTitle.text = "ویرایش عکس"
             pact.toolbarAction.visibility = View.VISIBLE
             pact.toolbarAction.onClick {
-                callback.switchFragmentTo(FragmentId.SHARE, imageUrl)
+                saveBitmapExplicitly()
+                toast("عکس شما ذخیره شد")
             }
         }
-        progressDialog.show()
-        loadPhotos()
+
         displaySize = getDisplaySize(act)
         return view
     }
 
-    private fun loadPhotos() {
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        progressDialog.show()
+        loadBitmapData()
+    }
+
+    private fun loadBitmapData() {
         executor.execute {
             info("thread id: " + currentThread)
             countDownLatch.await()
-            loadBitmaps(displaySize.x, displaySize.y)
-            setImageViews()
+
+            decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.FRONT.address), displaySize.x / 4, displaySize.y / 4).apply {
+                onUiThread {
+                    frontImageView.y = 200f
+                    frontImageView.setImageBitmap(this)
+                    frontImageView.setOnTouchListener(OnTouchListener())
+                }
+            }
+            decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.BACK.address), displaySize.x, displaySize.y).apply {
+                onUiThread { backImageView.setImageBitmap(this) }
+            }
+            onUiThread {
+//                saveBitmapImplicitly(finalImageUrl)
+                progressDialog.dismiss()
+            }
         }
     }
 
-    private fun loadBitmaps(width: Int, height: Int) {
-        frontBitmap = Util.decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.FRONT.address), width / 4, height / 4)
-        backBitmap = Util.decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.BACK.address), width, height)
+    public fun saveBitmapImplicitly(address: String) {
+        photoLayout.saveBitmap(File(getExternalApplicationStorage(), address))
     }
 
-    private fun setImageViews() {
-        frontImageView.post {
-            frontImageView.y = 200f
-            frontImageView.setImageBitmap(frontBitmap)
-            frontImageView.setOnTouchListener(OnTouchListener())
-        }
-        backImageView.post { backImageView.setImageBitmap(backBitmap) }
-        imageUrl = photoLayout.saveBitmap(File(getExternalApplicationStorage(), dualImageUrl))
-        progressDialog.dismiss()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        frontBitmap.recycle()
-        backBitmap.recycle()
+    private fun saveBitmapExplicitly() {
+        photoLayout.saveBitmap(File(getOutputMediaFilePath()))
     }
 
     private inner class OnTouchListener : View.OnTouchListener {

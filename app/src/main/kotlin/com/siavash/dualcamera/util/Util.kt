@@ -1,10 +1,8 @@
 package com.siavash.dualcamera.util
 
 import android.app.Activity
-import android.app.Application
 import android.app.Fragment
 import android.app.FragmentManager
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
@@ -21,39 +19,24 @@ import java.util.concurrent.Executors
 
 internal val orientation = 90
 internal val compressQuality = 90
-internal val dualImageUrl = ".dualImageUrl"
-internal val finalImageUrl = "imageUrl"
+internal val finalImageUrl = ".dualImageUrl"
 internal val countDownLatch = ResettableCountDownLatch(2)
 internal val executor = Executors.newFixedThreadPool(3)
 
-internal fun getAppName(): String {
-    val app = Application()
-    return app.packageManager.getApplicationLabel(app.packageManager.getApplicationInfo(app.packageName, PackageManager.SIGNATURE_MATCH)) as String
-}
-
 internal fun getExternalApplicationStorage(): String {
-    return getExternalStorageDirectoryPath("DualCamera")
+    return getExternalStorageDirectoryPath(ApplicationBase.appName)
 }
 
 internal fun getExternalStorageDirectoryPath(appName: String): String {
-    val file = File(Environment.getExternalStorageDirectory(), appName)
-    if (!file.exists() && !file.mkdirs()) throw NullPointerException("File directory not found")
+    val dir = File(Environment.getExternalStorageDirectory(), appName)
+    if (!dir.exists() && !dir.mkdirs()) throw NullPointerException("File directory not found")
 
-    return file.absolutePath
+    return dir.absolutePath
 }
 
-internal fun getOutputMediaFile(): File {
-    val mediaStorageDir = File(Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES), ApplicationBase.getAppName())
-
-    if (!mediaStorageDir.exists()) {
-        if (!mediaStorageDir.mkdirs()) {
-            throw NullPointerException("File directory not found")
-        }
-    }
+internal fun getOutputMediaFilePath(): String {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date());
-    val mediaFile = File(mediaStorageDir.path + File.separator + "IMG_" + timeStamp + ".jpg");
-    return mediaFile
+    return getExternalApplicationStorage() + File.separator + "IMG_$timeStamp.jpg"
 }
 
 internal fun View.saveBitmap(file: File): String {
@@ -85,14 +68,14 @@ internal fun decodeSampledBitmap(file: File, reqWidth: Int, reqHeight: Int): Bit
     // first decode check the raw image dimensions
     val options = BitmapFactory.Options()
     options.inJustDecodeBounds = true
-    decodeBitmap(file, options)
+    Util.decodeBitmap(file, options)
 
     // calculate the factor to scale down by depending on the desired height
     options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
     options.inScaled = false
     options.inJustDecodeBounds = false
 
-    return decodeBitmap(file, options)
+    return Util.decodeBitmap(file, options)
 }
 
 /**
@@ -127,7 +110,6 @@ internal fun decodeBitmap(file: File, options: BitmapFactory.Options): Bitmap {
  * Loads bitmap from data array
  */
 internal fun decodeBitmap(data: ByteArray, options: BitmapFactory.Options): Bitmap {
-    val date = data.size
     return BitmapFactory.decodeByteArray(data, 0, data.size, options)
 }
 
@@ -190,7 +172,7 @@ internal fun FragmentManager.addFragment(container: Int, fragment: Fragment, tag
     this.beginTransaction()
             .setCustomAnimations(animEnter, animExit, animPopEnter, animPopExit)
             .add(container, fragment, tag)
-            .addToBackStack(null)
+            .addToBackStack(tag)
             .commit()
 }
 

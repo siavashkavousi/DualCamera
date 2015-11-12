@@ -20,6 +20,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:fitsSystemWindows="true"
-        app:menu="@menu/activity_photo_drawer" />
+        app:menu="@menu/activity_photo_drawer"
+        app:headerLayout="@layout/app_navigation_header"/>
 
 </android.support.v4.widget.DrawerLayout>

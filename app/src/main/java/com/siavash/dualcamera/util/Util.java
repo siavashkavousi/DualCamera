@@ -60,7 +60,7 @@ public class Util {
 
     @Nullable public static File setFile(String name) {
         File imageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), ApplicationBase.getAppName());
+                Environment.DIRECTORY_PICTURES), ApplicationBase.ApplicationName.getAppName());
 
         if (!imageDir.exists()) {
             if (!imageDir.mkdirs()) {
