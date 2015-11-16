@@ -15,7 +15,10 @@ import android.widget.RelativeLayout
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.activities.PhotoActivity
 import com.siavash.dualcamera.util.*
-import org.jetbrains.anko.*
+import org.jetbrains.anko.act
+import org.jetbrains.anko.info
+import org.jetbrains.anko.onUiThread
+import org.jetbrains.anko.toast
 import java.io.File
 import kotlin.concurrent.currentThread
 
@@ -33,16 +36,7 @@ class PhotoFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_photo, container, false)
-        if (act is PhotoActivity) {
-            val pact = act as PhotoActivity
-            pact.toolbarTitle.text = "ویرایش عکس"
-            pact.toolbarAction.visibility = View.VISIBLE
-            pact.toolbarAction.onClick {
-                saveBitmapExplicitly()
-                toast("عکس شما ذخیره شد")
-            }
-        }
-
+        if (act is PhotoActivity) setUpToolbar()
         displaySize = getDisplaySize(act)
         return view
     }
@@ -52,6 +46,15 @@ class PhotoFragment : BaseFragment() {
 
         progressDialog.show()
         loadBitmapData()
+    }
+
+    private fun setUpToolbar() {
+        val toolbar = (act as PhotoActivity).toolbar
+        toolbar.setTitle("ویرایش عکس")
+        toolbar.setAction {
+            saveBitmapExplicitly()
+            toast("عکس شما ذخیره شد")
+        }
     }
 
     private fun loadBitmapData() {
@@ -70,13 +73,13 @@ class PhotoFragment : BaseFragment() {
                 onUiThread { backImageView.setImageBitmap(this) }
             }
             onUiThread {
-//                saveBitmapImplicitly(finalImageUrl)
+                //                saveBitmapImplicitly(finalImageUrl)
                 progressDialog.dismiss()
             }
         }
     }
 
-    public fun saveBitmapImplicitly(address: String) {
+    fun saveBitmapImplicitly(address: String) {
         photoLayout.saveBitmap(File(getExternalApplicationStorage(), address))
     }
 

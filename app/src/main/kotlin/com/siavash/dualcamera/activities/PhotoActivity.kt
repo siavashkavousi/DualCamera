@@ -5,29 +5,20 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.MenuItem
-import android.widget.ImageButton
-import android.widget.TextView
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener
 import com.siavash.dualcamera.fragments.PhotoFragment
 import com.siavash.dualcamera.fragments.ShareFragment
 import com.siavash.dualcamera.util.*
-import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.onClick
 
 /**
  * Created by sia on 10/31/15.
  */
-class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
+class PhotoActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
     val drawer: DrawerLayout by bindView(R.id.drawer_layout)
     val toolbar: Toolbar by bindView(R.id.toolbar)
-    val toolbarTitle: TextView by bindView(R.id.toolbar_title)
-    val toolbarHamburger: ImageButton by bindView(R.id.toolbar_hamburger)
-    val toolbarAction: ImageButton by bindView(R.id.toolbar_action)
     val navigationView: NavigationView by bindView(R.id.nav_view)
 
     lateinit var photoFragment: PhotoFragment
@@ -39,18 +30,8 @@ class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         switchFragmentTo(FragmentId.PHOTO)
         navigationView.setNavigationItemSelectedListener(this)
-        toolbarTitle.typeface = StringUtil.getFont(ctx, StringUtil.FONT_AFSANEH)
-        toolbarHamburgerOnClick()
-    }
-
-    private fun toolbarHamburgerOnClick() {
-        toolbarHamburger.onClick {
-            if (drawer.isDrawerOpen(GravityCompat.END)) {
-                drawer.closeDrawer(GravityCompat.END)
-            } else {
-                drawer.openDrawer(GravityCompat.END)
-            }
-        }
+        toolbar.defaultHamburgerAction(drawer)
+        toolbar.defaultTitleStyle()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

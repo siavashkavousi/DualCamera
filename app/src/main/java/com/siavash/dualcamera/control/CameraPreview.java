@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * Surface on which the camera projects it's capture results. This is derived from Google's docs
  */
+@SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getSimpleName();
     // SurfaceHolder

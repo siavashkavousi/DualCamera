@@ -25,11 +25,11 @@ class ShareFragment : BaseFragment() {
     val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
     val shareText: TextView by bindView(R.id.share_to)
     val image: ImageView by bindView(R.id.photo_container)
-    lateinit var displaySize : Point
+    lateinit var displaySize: Point
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_share, container, false)
-        (act as PhotoActivity).toolbarTitle.text = "اشتراک گذاری"
+        setUpToolbar()
         displaySize = getDisplaySize(act)
         return view
     }
@@ -42,6 +42,11 @@ class ShareFragment : BaseFragment() {
         setListeners()
     }
 
+    private fun setUpToolbar() {
+        val toolbar = (act as PhotoActivity).toolbar
+        toolbar.setTitle("اشتراک گذاری")
+    }
+
     private fun setTypefaces() {
         //fixme string utils should be modified to kotlin equivalent
         shareText.typeface = StringUtil.getFont(activity, StringUtil.FONT_AFSANEH)
@@ -52,12 +57,9 @@ class ShareFragment : BaseFragment() {
 
     private fun setListeners() {
         val onClickListener = OnClickListener()
-        socialNetworks[0].setOnClickListener(onClickListener)
-        socialNetworks[1].setOnClickListener(onClickListener)
-        socialNetworks[2].setOnClickListener(onClickListener)
-        socialNetworks[3].setOnClickListener(onClickListener)
-        socialNetworks[4].setOnClickListener(onClickListener)
-        socialNetworks[5].setOnClickListener(onClickListener)
+        for (item in socialNetworks) {
+            item.setOnClickListener(onClickListener)
+        }
     }
 
     private fun shareIntent(intentName: String, socialName: String) {

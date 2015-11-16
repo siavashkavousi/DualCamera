@@ -15,7 +15,6 @@ import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.CameraPreview
 import com.siavash.dualcamera.util.*
 import org.jetbrains.anko.act
-import org.jetbrains.anko.find
 import org.jetbrains.anko.info
 import java.io.File
 import java.io.FileOutputStream
@@ -25,22 +24,25 @@ import kotlin.concurrent.currentThread
  * Parent class for camera controllers
  * Created by sia on 8/14/15.
  */
+@Suppress("deprecation")
 class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : BaseFragment() {
     var camera: Camera? = null
     var preview: CameraPreview? = null
-    lateinit var frameLayout: FrameLayout
-    lateinit var shutter: ImageButton
+    val frameLayout: FrameLayout by bindView(R.id.container)
+    val shutter: ImageButton by bindView(R.id.shutter_btn)
     lateinit var displaySize: Point
     val callback: OnFragmentInteractionListener by lazy { act as OnFragmentInteractionListener }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_camera, container, false)
-        frameLayout = view.find<FrameLayout>(R.id.container)
-        shutter = view.find<ImageButton>(R.id.shutter_btn)
+        return inflater.inflate(R.layout.fragment_camera, container, false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
         safeCameraOpenInView()
         shutter.setOnClickListener { takePicture() }
         displaySize = getDisplaySize(act)
-        return view
     }
 
     private fun safeCameraOpenInView(): Boolean {
