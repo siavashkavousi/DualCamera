@@ -3,9 +3,11 @@ package com.siavash.dualcamera.util
 import android.app.Activity
 import android.app.Fragment
 import android.app.FragmentManager
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
+import android.graphics.Typeface
 import android.os.Environment
 import android.view.View
 import com.siavash.dualcamera.ApplicationBase
@@ -181,4 +183,17 @@ internal fun FragmentManager.replaceFragment(container: Int, fragment: Fragment,
             .setCustomAnimations(animEnter, animExit, animPopEnter, animPopExit)
             .replace(container, fragment, tag)
             .commit()
+}
+
+internal fun getAppMainFont(context: Context): Typeface {
+    return getFont(context, Font.AFSANEH)
+}
+
+internal fun getDefaultPoemFont(context: Context): Typeface {
+    return getFont(context, Font.MASHIN_TAHRIR)
+}
+
+internal fun getFont(context: Context, fontName: Font): Typeface {
+    var resource: String = "fonts/" + fontName.resourceId
+    return Typeface.createFromAsset(context.assets, resource)
 }

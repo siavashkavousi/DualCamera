@@ -49,9 +49,9 @@ class ShareFragment : BaseFragment() {
 
     private fun setTypefaces() {
         //fixme string utils should be modified to kotlin equivalent
-        shareText.typeface = StringUtil.getFont(activity, StringUtil.FONT_AFSANEH)
+        shareText.typeface = getFont(activity, Font.AFSANEH)
         for (button in socialNetworks) {
-            button.typeface = StringUtil.getFont(activity, StringUtil.FONT_NAZANIN_BOLD)
+            button.typeface = getFont(activity, Font.NAZANIN_BOLD)
         }
     }
 

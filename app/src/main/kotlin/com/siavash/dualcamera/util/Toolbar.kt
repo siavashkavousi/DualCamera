@@ -5,7 +5,6 @@ import android.graphics.Typeface
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
-import android.support.v7.widget.Toolbar.VISIBLE
 import android.widget.ImageButton
 import android.widget.TextView
 import com.siavash.dualcamera.R
@@ -37,7 +36,7 @@ class Toolbar(context: Context) : Toolbar(context) {
     }
 
     fun defaultTitleStyle() {
-        toolbarTitle.typeface = StringUtil.getFont(context, StringUtil.FONT_AFSANEH)
+        toolbarTitle.typeface = getFont(context, Font.AFSANEH)
     }
 
     fun setActionItemVisibility(visibility: Int) {
