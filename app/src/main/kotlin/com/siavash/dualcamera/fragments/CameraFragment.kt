@@ -16,10 +16,8 @@ import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.CameraPreview
 import com.siavash.dualcamera.util.*
 import org.jetbrains.anko.act
-import org.jetbrains.anko.info
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.concurrent.currentThread
 
 /**
  * Parent class for camera controllers
@@ -27,12 +25,14 @@ import kotlin.concurrent.currentThread
  */
 @Suppress("deprecation")
 class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : Fragment() {
-    var camera: Camera? = null
-    var preview: CameraPreview? = null
-    val frameLayout: FrameLayout by bindView(R.id.container)
-    val shutter: ImageButton by bindView(R.id.shutter_btn)
-    lateinit var displaySize: Point
-    val callback: OnFragmentInteractionListener by lazy { act as OnFragmentInteractionListener }
+    private val frameLayout: FrameLayout by bindView(R.id.container)
+    private val shutter: ImageButton by bindView(R.id.shutter_btn)
+
+    private val callback: OnFragmentInteractionListener by lazy { act as OnFragmentInteractionListener }
+
+    private var camera: Camera? = null
+    private var preview: CameraPreview? = null
+    private lateinit var displaySize: Point
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)

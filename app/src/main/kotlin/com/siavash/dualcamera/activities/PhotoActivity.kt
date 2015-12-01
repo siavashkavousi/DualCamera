@@ -19,11 +19,12 @@ import org.jetbrains.anko.intentFor
  * Created by sia on 10/31/15.
  */
 class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
-    val drawer: DrawerLayout by bindView(R.id.drawer_layout)
+    private val drawer: DrawerLayout by bindView(R.id.drawer_layout)
     val toolbar: Toolbar by bindView(R.id.toolbar)
-    val navigationView: NavigationView by bindView(R.id.nav_view)
 
-    var photoFragment: PhotoFragment? = null
+    private val navigationView: NavigationView by bindView(R.id.nav_view)
+
+    private var photoFragment: PhotoFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

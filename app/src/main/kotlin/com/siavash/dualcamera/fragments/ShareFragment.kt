@@ -23,10 +23,11 @@ import java.io.File
  * Created by sia on 11/2/15.
  */
 class ShareFragment : Fragment() {
-    val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
-    val shareText: TextView by bindView(R.id.share_to)
-    val image: ImageView by bindView(R.id.photo_container)
-    lateinit var displaySize: Point
+    private val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
+    private val shareText: TextView by bindView(R.id.share_to)
+    private val image: ImageView by bindView(R.id.photo_container)
+
+    private lateinit var displaySize: Point
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_share, container, false)

@@ -26,12 +26,13 @@ import java.io.File
  * Created by sia on 8/18/15.
  */
 class PhotoFragment : Fragment() {
-    val photoLayout: RelativeLayout by bindView(R.id.photo_layout)
-    val backImageView: ImageView by bindView(R.id.photo_back)
-    val frontImageView: ImageView by bindView(R.id.photo_front)
-    val progressDialog: ProgressDialog by lazy { ProgressDialog.show(act as Context, "در حال بارگذاری", "در حال بارگذاری عکس ها", true, true) }
+    private val photoLayout: RelativeLayout by bindView(R.id.photo_layout)
+    private val backImageView: ImageView by bindView(R.id.photo_back)
+    private val frontImageView: ImageView by bindView(R.id.photo_front)
 
-    lateinit var displaySize: Point
+    private val progressDialog: ProgressDialog by lazy { ProgressDialog.show(act as Context, "در حال بارگذاری", "در حال بارگذاری عکس ها", true, true) }
+
+    private lateinit var displaySize: Point
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_photo, container, false)
