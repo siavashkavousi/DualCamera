@@ -15,7 +15,7 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/toolbar_hamburger"
+            android:id="@+id/toolbar_left"
             android:layout_width="@dimen/toolbar_size"
             android:layout_height="@dimen/toolbar_size"
             android:layout_alignParentEnd="true"
@@ -30,14 +30,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/toolbar_hamburger"
-            android:layout_toStartOf="@+id/toolbar_hamburger"
+            android:layout_toLeftOf="@+id/toolbar_left"
+            android:layout_toStartOf="@+id/toolbar_left"
             android:text="@string/app_name"
             android:textColor="@android:color/white"
             android:textSize="20sp" />
 
         <ImageButton
-            android:id="@+id/toolbar_action"
+            android:id="@+id/toolbar_right"
             android:layout_width="@dimen/toolbar_size"
             android:layout_height="@dimen/toolbar_size"
             android:layout_alignParentLeft="true"
@@ -46,7 +46,7 @@
             android:background="@null"
             android:padding="8dp"
             android:src="@drawable/ic_save"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
     </RelativeLayout>
 </android.support.v7.widget.Toolbar>

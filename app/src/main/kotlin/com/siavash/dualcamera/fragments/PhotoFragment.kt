@@ -50,7 +50,7 @@ class PhotoFragment : Fragment() {
     private fun setUpToolbar() {
         val toolbar = (act as PhotoActivity).toolbar
         toolbar.setTitle("ویرایش عکس")
-        toolbar.setAction {
+        toolbar.setRightAction {
             saveBitmap()
             toast("عکس شما ذخیره شد")
         }
@@ -87,7 +87,7 @@ class PhotoFragment : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
-        if (act is PhotoActivity) (act as PhotoActivity).toolbar.setActionItemVisibility(View.GONE)
+        if (act is PhotoActivity) (act as PhotoActivity).toolbar.setRightItemVisibility(View.GONE)
     }
 
     private inner class OnTouchListener : View.OnTouchListener {

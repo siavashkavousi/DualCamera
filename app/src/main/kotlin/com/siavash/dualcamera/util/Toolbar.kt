@@ -5,6 +5,9 @@ import android.graphics.Typeface
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import com.siavash.dualcamera.R
@@ -15,49 +18,58 @@ import java.util.jar.Attributes
 /**
  * Created by sia on 11/16/15.
  */
-class Toolbar(context: Context) : Toolbar(context) {
-    val toolbarTitle: TextView by bindView(R.id.toolbar_title)
-    val toolbarAction: ImageButton by bindView(R.id.toolbar_action)
-    val toolbarHamburger: ImageButton by bindView(R.id.toolbar_hamburger)
+class Toolbar : Toolbar {
+    private val title: TextView by bindView(R.id.toolbar_title)
+    val right: ImageButton by bindView(R.id.toolbar_right)
+    val left: ImageButton by bindView(R.id.toolbar_left)
 
-    constructor(context: Context, attributes: Attributes?) : this(context) {
+    constructor(context: Context) : super(context) {
+        setUp(context)
+    }
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        setUp(context)
+    }
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        setUp(context)
+    }
+
+    private fun setUp(context: Context) {
         context.layoutInflater.inflate(R.layout.layout_toolbar, this, true)
     }
 
-    constructor(context: Context, attributes: Attributes?, defStyleAttr: Int) : this(context) {
-    }
-
     fun setTitle(title: String) {
-        toolbarTitle.text = title
+        this.title.text = title
     }
 
     fun setTitleStyle(typeface: Typeface) {
-        toolbarTitle.typeface = typeface
+        title.typeface = typeface
     }
 
     fun defaultTitleStyle() {
-        toolbarTitle.typeface = getFont(context, Font.AFSANEH)
+        title.typeface = getFont(context, Font.AFSANEH)
     }
 
-    fun setActionItemVisibility(visibility: Int) {
-        toolbarAction.visibility = visibility
+    fun setRightItemVisibility(visibility: Int) {
+        right.visibility = visibility
     }
 
-    fun setAction(function: () -> Unit) {
-        if (toolbarAction.visibility != VISIBLE) setActionItemVisibility(VISIBLE)
-        toolbarAction.onClick {
+    inline fun setRightAction(crossinline function: () -> Unit) {
+        if (right.visibility != VISIBLE) setRightItemVisibility(VISIBLE)
+        right.onClick {
             function()
         }
     }
 
-    fun setHamburgerAction(function: () -> Unit) {
-        toolbarHamburger.onClick {
+    inline fun setLeftAction(crossinline function: () -> Unit) {
+        left.onClick {
             function()
         }
     }
 
     fun defaultHamburgerAction(drawer: DrawerLayout) {
-        toolbarHamburger.onClick {
+        left.onClick {
             if (drawer.isDrawerOpen(GravityCompat.END)) {
                 drawer.closeDrawer(GravityCompat.END)
             } else {
