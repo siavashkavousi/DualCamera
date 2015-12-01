@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
+import android.view.SurfaceView
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener
 import com.siavash.dualcamera.fragments.PhotoFragment
@@ -16,12 +18,12 @@ import org.jetbrains.anko.intentFor
 /**
  * Created by sia on 10/31/15.
  */
-class PhotoActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
+class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
     val drawer: DrawerLayout by bindView(R.id.drawer_layout)
     val toolbar: Toolbar by bindView(R.id.toolbar)
     val navigationView: NavigationView by bindView(R.id.nav_view)
 
-    lateinit var photoFragment: PhotoFragment
+    var photoFragment: PhotoFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +59,10 @@ class PhotoActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedLis
                 fragmentManager.popBackStack()
             else {
                 photoFragment = PhotoFragment()
-                fragmentManager.addFragment(R.id.container, photoFragment, fragmentId.name)
+                fragmentManager.addFragment(R.id.container, photoFragment as PhotoFragment, fragmentId.name)
             }
         } else if (fragmentId == FragmentId.SHARE) {
-            //fixme this kind of method calling is not correct I should fix this
-            photoFragment?.saveBitmapImplicitly(finalImageUrl)
+            photoFragment?.saveBitmapHidden(finalImageUrl)
             fragmentManager.addFragment(R.id.container, ShareFragment(), FragmentId.SHARE.name)
         }
     }

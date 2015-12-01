@@ -1,5 +1,6 @@
 package com.siavash.dualcamera.fragments
 
+import android.app.Fragment
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Point
@@ -25,7 +26,7 @@ import kotlin.concurrent.currentThread
  * Created by sia on 8/14/15.
  */
 @Suppress("deprecation")
-class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : BaseFragment() {
+class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : Fragment() {
     var camera: Camera? = null
     var preview: CameraPreview? = null
     val frameLayout: FrameLayout by bindView(R.id.container)
@@ -74,9 +75,8 @@ class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : B
     private fun takePicture() {
         camera?.takePicture(null, null, Camera.PictureCallback() { data, camera ->
             executor.execute {
-                info("thread id: " + currentThread)
                 saveBitmap(data, cameraId)
-                countDownLatch.countDown()
+                cameraPhotoDoneSignal.countDown()
             }
             callback.switchFragmentTo(nextFragmentId)
         })
@@ -124,8 +124,8 @@ class CameraFragment(val cameraId: CameraId, val nextFragmentId: FragmentId) : B
         }
     }
 
-    override fun onStop() {
+    override fun onPause() {
+        super.onPause()
         releaseCameraAndPreview()
-        super.onStop()
     }
 }

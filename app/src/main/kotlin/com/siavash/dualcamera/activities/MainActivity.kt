@@ -1,20 +1,21 @@
 package com.siavash.dualcamera.activities
 
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.CameraFragment
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener
 import com.siavash.dualcamera.util.CameraId
 import com.siavash.dualcamera.util.FragmentId
-import com.siavash.dualcamera.util.countDownLatch
+import com.siavash.dualcamera.util.cameraPhotoDoneSignal
 import com.siavash.dualcamera.util.replaceFragment
 import org.jetbrains.anko.startActivity
 
-class MainActivity : BaseActivity(), OnFragmentInteractionListener {
+class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
 
     override fun onResume() {
         super.onResume()
-        countDownLatch.reset()
+        cameraPhotoDoneSignal.reset()
         switchFragmentTo(FragmentId.CAMERA_FRONT)
     }
 

@@ -22,7 +22,8 @@ import java.util.concurrent.Executors
 internal val orientation = 90
 internal val compressQuality = 90
 internal val finalImageUrl = ".dualImageUrl"
-internal val countDownLatch = ResettableCountDownLatch(2)
+internal val cameraPhotoDoneSignal = ResettableCountDownLatch(2)
+internal val finalPhotoDoneSignal = ResettableCountDownLatch(1)
 internal val executor = Executors.newFixedThreadPool(3)
 
 internal fun getExternalApplicationStorage(): String {

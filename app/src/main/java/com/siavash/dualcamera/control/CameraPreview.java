@@ -23,33 +23,33 @@ import java.util.List;
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getSimpleName();
     // SurfaceHolder
-    private SurfaceHolder mHolder;
+    private SurfaceHolder holder;
     // Our Camera.
-    private Camera mCamera;
+    private Camera camera;
     // Parent Context.
-    private Context mContext;
+    private Context context;
     // Camera Sizing (For rotation, orientation changes)
-    private Camera.Size mPreviewSize;
+    private Camera.Size previewSize;
     // List of supported preview sizes
-    private List<Camera.Size> mSupportedPreviewSizes;
+    private List<Camera.Size> supportedPreviewSizes;
     // Flash modes supported by this camera
-    private List<String> mSupportedFlashModes;
+    private List<String> supportedFlashModes;
     // View holding this camera.
-    private ViewGroup mCameraLayout;
+    private ViewGroup cameraLayout;
 
     public CameraPreview(Context context, Camera camera, ViewGroup cameraLayout) {
         super(context);
 
         // Capture the context
-        mCameraLayout = cameraLayout;
-        mContext = context;
+        this.cameraLayout = cameraLayout;
+        this.context = context;
         setUpCamera(camera);
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
-        mHolder = getHolder();
-        mHolder.addCallback(this);
-        mHolder.setKeepScreenOn(true);
+        holder = getHolder();
+        holder.addCallback(this);
+        holder.setKeepScreenOn(true);
     }
 
     /**
@@ -57,9 +57,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      */
     public void startCameraPreview() {
         try {
-            mCamera.setPreviewDisplay(mHolder);
-            mCamera.setDisplayOrientation(Constants.DISPLAY_ORIENTATION);
-            mCamera.startPreview();
+            camera.setPreviewDisplay(holder);
+            camera.setDisplayOrientation(Constants.DISPLAY_ORIENTATION);
+            camera.startPreview();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -71,15 +71,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      * @param camera
      */
     private void setUpCamera(Camera camera) {
-        mCamera = camera;
-        mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
-        mSupportedFlashModes = mCamera.getParameters().getSupportedFlashModes();
+        this.camera = camera;
+        supportedPreviewSizes = this.camera.getParameters().getSupportedPreviewSizes();
+        supportedFlashModes = this.camera.getParameters().getSupportedFlashModes();
 
         // Set the camera to Auto Flash mode.
-        if (mSupportedFlashModes != null && mSupportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)) {
-            Camera.Parameters parameters = mCamera.getParameters();
+        if (supportedFlashModes != null && supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)) {
+            Camera.Parameters parameters = this.camera.getParameters();
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-            mCamera.setParameters(parameters);
+            this.camera.setParameters(parameters);
         }
 
         requestLayout();
@@ -92,7 +92,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      */
     @Override public void surfaceCreated(SurfaceHolder holder) {
         try {
-            mCamera.setPreviewDisplay(holder);
+            camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,8 +104,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      * @param holder
      */
     @Override public void surfaceDestroyed(SurfaceHolder holder) {
-        if (mCamera != null) {
-            mCamera.stopPreview();
+        if (camera != null) {
+            camera.stopPreview();
+            camera.release();
+            camera = null;
         }
     }
 
@@ -121,26 +123,26 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
-        if (mHolder.getSurface() == null) {
+        if (this.holder.getSurface() == null) {
             // preview surface does not exist
             return;
         }
 
         // stop preview before making changes
         try {
-            Camera.Parameters parameters = mCamera.getParameters();
+            Camera.Parameters parameters = camera.getParameters();
 
             // Set the auto-focus mode to "continuous"
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 
             // Preview size must exist.
-            if (mPreviewSize != null) {
-                Camera.Size previewSize = mPreviewSize;
+            if (previewSize != null) {
+                Camera.Size previewSize = this.previewSize;
                 parameters.setPreviewSize(previewSize.width, previewSize.height);
             }
 
-            mCamera.setParameters(parameters);
-            mCamera.startPreview();
+            camera.setParameters(parameters);
+            camera.startPreview();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,17 +154,17 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      * @param changed
      */
     @Override protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (changed && mCameraLayout.getChildCount() > 0) {
-            final View child = mCameraLayout.getChildAt(0);
+        if (changed && cameraLayout.getChildCount() > 0) {
+            final View child = cameraLayout.getChildAt(0);
 
             final int width = r - l;
             final int height = b - t;
 
             int previewWidth = width;
             int previewHeight = height;
-            if (mPreviewSize != null) {
-                previewWidth = mPreviewSize.width;
-                previewHeight = mPreviewSize.height;
+            if (previewSize != null) {
+                previewWidth = previewSize.width;
+                previewHeight = previewSize.height;
             }
             if (previewWidth == 0) {
                 previewWidth = 1;
@@ -188,7 +190,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
         Point displaySize = new Point();
-        Activity activity = (Activity) mContext;
+        Activity activity = (Activity) context;
         {
             Display display = activity.getWindowManager().getDefaultDisplay();
             display.getSize(displaySize);
@@ -230,7 +232,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
         Point displaySize = new Point();
-        Activity activity = (Activity) mContext;
+        Activity activity = (Activity) context;
         {
             Display display = activity.getWindowManager().getDefaultDisplay();
             display.getSize(displaySize);
@@ -308,11 +310,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 //    }
 
     public Camera getCamera() {
-        return mCamera;
+        return camera;
     }
 
     public void setCamera(Camera camera) {
-        this.mCamera = camera;
+        this.camera = camera;
     }
 }
 

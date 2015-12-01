@@ -11,6 +11,8 @@ public class Constants {
     //endregion
 
     //region Fragments
+    public static final int PHOTO_FRAGMENT = 0;
+    public static final int CAMERA_BACK_FRAGMENT = 1;
     public static final int CAMERA_FRONT_FRAGMENT = 2;
     public static final int SHARE_FRAGMENT = 3;
 

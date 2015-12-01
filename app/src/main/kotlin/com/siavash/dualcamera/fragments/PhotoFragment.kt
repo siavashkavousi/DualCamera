@@ -1,5 +1,6 @@
 package com.siavash.dualcamera.fragments
 
+import android.app.Fragment
 import android.app.ProgressDialog
 import android.content.Context
 import android.graphics.Matrix
@@ -16,17 +17,15 @@ import com.siavash.dualcamera.R
 import com.siavash.dualcamera.activities.PhotoActivity
 import com.siavash.dualcamera.util.*
 import org.jetbrains.anko.act
-import org.jetbrains.anko.info
 import org.jetbrains.anko.onUiThread
 import org.jetbrains.anko.toast
 import java.io.File
-import kotlin.concurrent.currentThread
 
 /**
  * Editing photos before saving into file or sharing with others
  * Created by sia on 8/18/15.
  */
-class PhotoFragment : BaseFragment() {
+class PhotoFragment : Fragment() {
     val photoLayout: RelativeLayout by bindView(R.id.photo_layout)
     val backImageView: ImageView by bindView(R.id.photo_back)
     val frontImageView: ImageView by bindView(R.id.photo_front)
@@ -52,15 +51,14 @@ class PhotoFragment : BaseFragment() {
         val toolbar = (act as PhotoActivity).toolbar
         toolbar.setTitle("ویرایش عکس")
         toolbar.setAction {
-            saveBitmapExplicitly()
+            saveBitmap()
             toast("عکس شما ذخیره شد")
         }
     }
 
     private fun loadBitmapData() {
         executor.execute {
-            info("thread id: " + currentThread)
-            countDownLatch.await()
+            cameraPhotoDoneSignal.await()
 
             decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.FRONT.address), displaySize.x / 4, displaySize.y / 4).apply {
                 onUiThread {
@@ -72,19 +70,24 @@ class PhotoFragment : BaseFragment() {
             decodeSampledBitmap(File(getExternalApplicationStorage(), CameraId.BACK.address), displaySize.x, displaySize.y).apply {
                 onUiThread { backImageView.setImageBitmap(this) }
             }
-            onUiThread {
-                //                saveBitmapImplicitly(finalImageUrl)
-                progressDialog.dismiss()
-            }
+            onUiThread { progressDialog.dismiss() }
         }
     }
 
-    fun saveBitmapImplicitly(address: String) {
+    /**
+     * save bitmap which is hidden with finalImageUrl name
+     */
+    fun saveBitmapHidden(address: String) {
         photoLayout.saveBitmap(File(getExternalApplicationStorage(), address))
     }
 
-    private fun saveBitmapExplicitly() {
+    private fun saveBitmap() {
         photoLayout.saveBitmap(File(getOutputMediaFilePath()))
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        if (act is PhotoActivity) (act as PhotoActivity).toolbar.setActionItemVisibility(View.GONE)
     }
 
     private inner class OnTouchListener : View.OnTouchListener {

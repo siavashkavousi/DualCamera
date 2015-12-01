@@ -19,9 +19,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    repositories {
-        maven { url 'https://maven.fabric.io/public' }
-    }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -42,7 +39,7 @@ dependencies {
     }
 }
 buildscript {
-    ext.kotlin_version = '1.0.0-beta-2417'
+    ext.kotlin_version = '1.0.0-beta-2423'
     ext.anko_version = '0.7.2'
     repositories {
         mavenCentral()
@@ -55,4 +52,5 @@ buildscript {
 }
 repositories {
     mavenCentral()
+    maven { url 'https://maven.fabric.io/public' }
 }

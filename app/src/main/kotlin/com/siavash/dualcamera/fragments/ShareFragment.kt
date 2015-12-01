@@ -1,5 +1,6 @@
 package com.siavash.dualcamera.fragments
 
+import android.app.Fragment
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Point
@@ -21,7 +22,7 @@ import java.io.File
 /**
  * Created by sia on 11/2/15.
  */
-class ShareFragment : BaseFragment() {
+class ShareFragment : Fragment() {
     val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
     val shareText: TextView by bindView(R.id.share_to)
     val image: ImageView by bindView(R.id.photo_container)
@@ -29,17 +30,21 @@ class ShareFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_share, container, false)
-        setUpToolbar()
+        if (act is PhotoActivity) setUpToolbar()
         displaySize = getDisplaySize(act)
         return view
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val bitmap = Util.decodeSampledBitmap(File(getExternalApplicationStorage(), finalImageUrl), displaySize.x, displaySize.y)
-        image.setImageBitmap(bitmap)
+
+        loadBitmapData()
         setTypefaces()
         setListeners()
+    }
+
+    private fun loadBitmapData() {
+        image.setImageBitmap(Util.decodeSampledBitmap(File(getExternalApplicationStorage(), finalImageUrl), displaySize.x, displaySize.y))
     }
 
     private fun setUpToolbar() {
@@ -48,7 +53,6 @@ class ShareFragment : BaseFragment() {
     }
 
     private fun setTypefaces() {
-        //fixme string utils should be modified to kotlin equivalent
         shareText.typeface = getFont(activity, Font.AFSANEH)
         for (button in socialNetworks) {
             button.typeface = getFont(activity, Font.NAZANIN_BOLD)
