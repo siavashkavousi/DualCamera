@@ -1,5 +1,8 @@
 package com.siavash.dualcamera.util
 
+import android.hardware.Camera
+import android.view.TextureView
+
 /**
  * Created by sia on 10/25/15.
  */
@@ -8,7 +11,7 @@ enum class FragmentId {
 }
 
 enum class CameraId(val address: String, val id: Int) {
-    BACK(".back", 0), FRONT(".front", 1)
+    BACK("back.jpg", Camera.CameraInfo.CAMERA_FACING_BACK), FRONT("front.jpg", Camera.CameraInfo.CAMERA_FACING_FRONT)
 }
 
 enum class OnTouchAction {

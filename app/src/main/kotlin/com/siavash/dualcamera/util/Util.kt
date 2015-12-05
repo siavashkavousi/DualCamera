@@ -3,6 +3,7 @@ package com.siavash.dualcamera.util
 import android.app.Activity
 import android.app.Fragment
 import android.app.FragmentManager
+import android.app.ProgressDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -19,30 +20,32 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 
-internal val orientation = 90
-internal val compressQuality = 90
-internal val finalImageUrl = ".dualImageUrl"
-internal val cameraPhotoDoneSignal = ResettableCountDownLatch(2)
-internal val finalPhotoDoneSignal = ResettableCountDownLatch(1)
-internal val executor = Executors.newFixedThreadPool(3)
+val orientation = 90
+val compressQuality = 90
+val finalImageUrl = ".dualImageUrl"
 
-internal fun getExternalApplicationStorage(): String {
+// thread pool and thread related vars
+private val coreCount = Runtime.getRuntime().availableProcessors()
+val executor = Executors.newFixedThreadPool(coreCount + 1)
+val cameraPhotoDoneSignal = ResettableCountDownLatch(2)
+
+fun getExternalApplicationStorage(): String {
     return getExternalStorageDirectoryPath(ApplicationBase.appName)
 }
 
-internal fun getExternalStorageDirectoryPath(appName: String): String {
+fun getExternalStorageDirectoryPath(appName: String): String {
     val dir = File(Environment.getExternalStorageDirectory(), appName)
     if (!dir.exists() && !dir.mkdirs()) throw NullPointerException("File directory not found")
 
     return dir.absolutePath
 }
 
-internal fun getOutputMediaFilePath(): String {
+fun getOutputMediaFilePath(): String {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date());
     return getExternalApplicationStorage() + File.separator + "IMG_$timeStamp.jpg"
 }
 
-internal fun View.saveBitmap(file: File): String {
+fun View.saveBitmap(file: File): String {
     this.isDrawingCacheEnabled = true
     val bitmap = this.drawingCache
     val imageUrl = bitmap.encodeBitmap(file)
@@ -55,103 +58,53 @@ internal fun View.saveBitmap(file: File): String {
  * @param targetFile Target file in order to save bitmap into it
  * @return Absolute path to the saved bitmap file
  */
-internal fun Bitmap.encodeBitmap(targetFile: File): String {
+fun Bitmap.encodeBitmap(targetFile: File): String {
     this.compress(Bitmap.CompressFormat.JPEG, compressQuality, FileOutputStream(targetFile))
     return targetFile.absolutePath
 }
 
 /**
  * Loads sampled bitmap from file
- * @param file File which contains bitmap
+ * @param imagePath File path which contains bitmap
  * @param reqWidth Requested width
  * @param reqHeight Requested height
  * @return decoded bitmap
  */
-internal fun decodeSampledBitmap(file: File, reqWidth: Int, reqHeight: Int): Bitmap {
+fun decodeSampledBitmap(imagePath: String, reqWidth: Int, reqHeight: Int): Bitmap {
     // first decode check the raw image dimensions
     val options = BitmapFactory.Options()
     options.inJustDecodeBounds = true
-    Util.decodeBitmap(file, options)
+    BitmapFactory.decodeFile(imagePath, options)
 
     // calculate the factor to scale down by depending on the desired height
     options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
     options.inScaled = false
     options.inJustDecodeBounds = false
 
-    return Util.decodeBitmap(file, options)
-}
-
-/**
- * Loads sampled bitmap from data array
- * @param data data array
- * @param reqWidth Requested width
- * @param reqHeight Requested height
- * @return decoded bitmap
- */
-internal fun decodeSampledBitmap(data: ByteArray, reqWidth: Int, reqHeight: Int): Bitmap {
-    // first decode check the raw image dimensions
-    val options = BitmapFactory.Options()
-    options.inJustDecodeBounds = true
-    Util.decodeBitmap(data, options)
-
-    // calculate the factor to scale down by depending on the desired height
-    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
-    options.inScaled = false
-    options.inJustDecodeBounds = false
-
-    return Util.decodeBitmap(data, options)
-}
-
-/**
- * Loads bitmap from file
- */
-internal fun decodeBitmap(file: File, options: BitmapFactory.Options): Bitmap {
-    return BitmapFactory.decodeStream(FileInputStream(file), null, options)
-}
-
-/**
- * Loads bitmap from data array
- */
-internal fun decodeBitmap(data: ByteArray, options: BitmapFactory.Options): Bitmap {
-    return BitmapFactory.decodeByteArray(data, 0, data.size, options)
+    return BitmapFactory.decodeFile(imagePath, options)
 }
 
 private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-    // raw height and width of image
-    val imageHeight = options.outHeight
-    val imageWidth = options.outWidth
-    // calculate the factor to scale down by depending on the desired height
+    val height = options.outHeight
+    val width = options.outWidth
     var inSampleSize = 1
-    if (imageHeight > reqHeight || imageWidth > reqWidth) {
-        val heightRatio: Int
-        val widthRatio: Int
-        if (isRoundUpNeeded(imageHeight, reqHeight))
-            heightRatio = Math.ceil((imageHeight.toFloat() / reqHeight).toDouble()).toInt()
-        else
-            heightRatio = imageHeight / reqHeight
-        if (isRoundUpNeeded(imageWidth, reqWidth))
-            widthRatio = Math.ceil((imageWidth.toFloat() / reqWidth).toDouble()).toInt()
-        else
-            widthRatio = imageWidth / reqWidth
-        // choose the smallest factor to scale down by, so the scaled image is always slightly larger than needed
-        inSampleSize = if (heightRatio < widthRatio) heightRatio else widthRatio
-    }
 
+    if (height > reqHeight || width > reqWidth) {
+        val halfHeight = height / 2
+        val halfWidth = width / 2
+
+        while ((halfHeight / inSampleSize > reqHeight) && (halfWidth / inSampleSize > halfWidth)) inSampleSize *= 2
+    }
     return inSampleSize
 }
 
-private fun isRoundUpNeeded(imageSize: Int, reqSize: Int): Boolean {
-    val ratio = imageSize / reqSize
-    val fractionalRatio = imageSize.toFloat() / reqSize
-    return fractionalRatio - ratio > 0.5
-}
 
 /**
  * Copies file from source to destination
  * @param src source file
  * @param dst destination file
  */
-internal fun File.copy(src: File, dst: File) {
+fun File.copy(src: File, dst: File) {
     try {
         val inStream = FileInputStream(src)
         val outStream = FileOutputStream(dst)
@@ -165,13 +118,13 @@ internal fun File.copy(src: File, dst: File) {
     }
 }
 
-internal fun getDisplaySize(activity: Activity): Point {
+fun getDisplaySize(activity: Activity): Point {
     val p = Point()
     activity.windowManager.defaultDisplay.getSize(p)
     return p
 }
 
-internal fun FragmentManager.addFragment(container: Int, fragment: Fragment, tag: String? = null, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0) {
+fun FragmentManager.addFragment(container: Int, fragment: Fragment, tag: String? = null, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0) {
     this.beginTransaction()
             .setCustomAnimations(animEnter, animExit, animPopEnter, animPopExit)
             .add(container, fragment, tag)
@@ -179,22 +132,58 @@ internal fun FragmentManager.addFragment(container: Int, fragment: Fragment, tag
             .commit()
 }
 
-internal fun FragmentManager.replaceFragment(container: Int, fragment: Fragment, tag: String? = null, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0) {
+fun FragmentManager.replaceFragment(container: Int, fragment: Fragment, tag: String? = null, animEnter: Int = 0, animExit: Int = 0, animPopEnter: Int = 0, animPopExit: Int = 0) {
     this.beginTransaction()
             .setCustomAnimations(animEnter, animExit, animPopEnter, animPopExit)
             .replace(container, fragment, tag)
             .commit()
 }
 
-internal fun getAppMainFont(context: Context): Typeface {
+fun getAppMainFont(context: Context): Typeface {
     return getFont(context, Font.AFSANEH)
 }
 
-internal fun getDefaultPoemFont(context: Context): Typeface {
+fun getDefaultPoemFont(context: Context): Typeface {
     return getFont(context, Font.MASHIN_TAHRIR)
 }
 
-internal fun getFont(context: Context, fontName: Font): Typeface {
+fun getFont(context: Context, fontName: Font): Typeface {
     var resource: String = "fonts/" + fontName.resourceId
     return Typeface.createFromAsset(context.assets, resource)
+}
+
+/**
+ * Returns the index of the smallest element or `null` if there are no elements.
+ */
+fun FloatArray.minElementIndex(): Int? {
+    if (isEmpty()) return null
+    var minIndex = 0
+    var min = this[0]
+    for (i in 1..lastIndex) {
+        val e = this[i]
+        if (min > e) {
+            minIndex = i
+            min = e
+        }
+    }
+    return minIndex
+}
+
+inline fun doAsyncAndWait(ctx: Context, message: String, crossinline function: () -> Unit) {
+    val progressDialog = ProgressDialog(ctx)
+    progressDialog.setMessage("در حال پردازش داب شما!")
+    progressDialog.setCancelable(false)
+    progressDialog.show()
+    executor.execute { function() }
+    progressDialog.dismiss()
+}
+
+inline fun doAsyncAndWaitThenShowResult(ctx: Context, message: String, crossinline function: () -> Unit, result: () -> Unit) {
+    val progressDialog = ProgressDialog(ctx)
+    progressDialog.setMessage(message)
+    progressDialog.setCancelable(false)
+    progressDialog.show()
+    executor.execute { function() }
+    progressDialog.dismiss()
+    result()
 }

@@ -13,6 +13,7 @@ import android.widget.TextView
 import com.siavash.dualcamera.R
 import org.jetbrains.anko.layoutInflater
 import org.jetbrains.anko.onClick
+import org.jetbrains.anko.wrapContent
 import java.util.jar.Attributes
 
 /**
@@ -37,6 +38,9 @@ class Toolbar : Toolbar {
 
     private fun setUp(context: Context) {
         context.layoutInflater.inflate(R.layout.layout_toolbar, this, true)
+        setContentInsetsAbsolute(0, 0)
+        minimumWidth = wrapContent
+        minimumHeight = 56
     }
 
     fun setTitle(title: String) {
