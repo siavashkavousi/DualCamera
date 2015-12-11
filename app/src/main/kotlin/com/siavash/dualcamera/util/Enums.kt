@@ -1,7 +1,6 @@
 package com.siavash.dualcamera.util
 
 import android.hardware.Camera
-import android.view.TextureView
 
 /**
  * Created by sia on 10/25/15.
@@ -28,4 +27,17 @@ enum class Font(val resourceId: String) {
 
 enum class FontSize(size: Float) {
     SMALL (18f), MEDIUM (20f), LARGE (22f), X_LARGE (25f), XX_LARGE (28f)
+}
+
+enum class Swipe() {
+    Up, Down
+}
+
+enum class TransformationType {
+    Mask, NinePatchMask, CropTop, CropCenter, CropBottom, CropSquare, CropCircle, GrayScale, RoundedCorners
+}
+
+enum class TransformationTypee {
+    Mask, NinePatchMask, CropTop, CropCenter, CropBottom, CropSquare, CropCircle, ColorFilter, Grayscale,
+    RoundedCorners, Blur, Toon, Sepia, Contrast, Invert, Pixel, Sketch, Swirl, Brightness, Kuawahara, Vignette
 }

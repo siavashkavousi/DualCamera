@@ -11,7 +11,12 @@ import android.graphics.Point
 import android.graphics.Typeface
 import android.os.Environment
 import android.view.View
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.siavash.dualcamera.ApplicationBase
+import com.siavash.dualcamera.R
+import jp.wasabeef.glide.transformations.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -20,14 +25,23 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 
-val orientation = 90
-val compressQuality = 90
-val finalImageUrl = ".dualImageUrl"
+const val orientation = 90
+const val compressQuality = 90
+const val finalImageUrl = ".dualImageUrl"
 
 // thread pool and thread related vars
 private val coreCount = Runtime.getRuntime().availableProcessors()
 val executor = Executors.newFixedThreadPool(coreCount + 1)
 val cameraPhotoDoneSignal = ResettableCountDownLatch(2)
+
+// animation constants
+const val shortAnimTime = 200L
+const val mediumAnimTime = 400L
+const val longAnimTime = 600L
+
+// camera images path
+val frontImagePath = getExternalApplicationStorage() + File.separator + CameraId.FRONT.address
+val backImagePath = getExternalApplicationStorage() + File.separator + CameraId.BACK.address
 
 fun getExternalApplicationStorage(): String {
     return getExternalStorageDirectoryPath(ApplicationBase.appName)
@@ -186,4 +200,60 @@ inline fun doAsyncAndWaitThenShowResult(ctx: Context, message: String, crossinli
     executor.execute { function() }
     progressDialog.dismiss()
     result()
+}
+
+fun dip2px(ctx: Context, dp: Float): Int {
+    val scale = ctx.resources.displayMetrics.density
+    return (dp * scale + 0.5f).toInt()
+}
+
+fun ImageView.setImageWithTransformation(path: String, transformationType: TransformationType) {
+    when (transformationType) {
+        TransformationType.Mask ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(CenterCrop(context), MaskTransformation(context, R.drawable.mask_starfish))
+                    .into(this)
+
+        TransformationType.NinePatchMask ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(CenterCrop(context), MaskTransformation(context, R.drawable.mask_chat_right))
+                    .into(this)
+
+        TransformationType.CropTop ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(CropTransformation(context, 30, 30, CropTransformation.CropType.TOP))
+                    .into(this)
+
+        TransformationType.CropCenter ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(CropTransformation(context, 30, 30))
+                    .into(this)
+
+        TransformationType.CropBottom ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(CropTransformation(context, 30, 30, CropTransformation.CropType.BOTTOM))
+                    .into(this)
+
+        TransformationType.CropSquare ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(CropSquareTransformation(context))
+                    .into(this)
+
+        TransformationType.CropCircle ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(CropCircleTransformation(context))
+                    .into(this)
+
+        TransformationType.GrayScale ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(GrayscaleTransformation(context))
+                    .into(this)
+
+        TransformationType.RoundedCorners ->
+            Glide.with(context).load(path)
+                    .bitmapTransform(RoundedCornersTransformation(context, 3, 0, RoundedCornersTransformation.CornerType.BOTTOM))
+                    .into(this)
+    }
 }

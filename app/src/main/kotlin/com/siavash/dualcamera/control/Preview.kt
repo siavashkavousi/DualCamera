@@ -17,17 +17,15 @@ import java.io.FileOutputStream
 class Preview : SurfaceHolder.Callback {
     private lateinit var cameraController: CameraController
     private lateinit var holder: SurfaceHolder
-    private lateinit var cameraId: CameraId
+    lateinit var cameraId : CameraId
 
-    constructor(cameraId: CameraId, surfaceView: SurfaceView) {
+    constructor(surfaceView: SurfaceView) {
         holder = surfaceView.holder
         holder.addCallback(this)
 
         val sdk = Build.VERSION.SDK_INT
         //        if (sdk < Build.VERSION_CODES.LOLLIPOP)
         cameraController = CameraController1()
-
-        this.cameraId = cameraId
     }
 
     fun startPreview() {
@@ -35,7 +33,8 @@ class Preview : SurfaceHolder.Callback {
         cameraController.startPreview()
     }
 
-    fun openCamera() {
+    fun openCamera(cameraId: CameraId) {
+        this.cameraId = cameraId
         cameraController.open(cameraId)
     }
 

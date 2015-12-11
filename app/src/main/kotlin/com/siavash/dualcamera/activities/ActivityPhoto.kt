@@ -7,24 +7,23 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-import android.view.SurfaceView
 import com.siavash.dualcamera.R
+import com.siavash.dualcamera.fragments.FragmentPhoto
+import com.siavash.dualcamera.fragments.FragmentShare
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener
-import com.siavash.dualcamera.fragments.PhotoFragment
-import com.siavash.dualcamera.fragments.ShareFragment
 import com.siavash.dualcamera.util.*
 import org.jetbrains.anko.intentFor
 
 /**
  * Created by sia on 10/31/15.
  */
-class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
+class ActivityPhoto : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
     private val drawer: DrawerLayout by bindView(R.id.drawer_layout)
     val toolbar: Toolbar by bindView(R.id.toolbar)
 
     private val navigationView: NavigationView by bindView(R.id.nav_view)
 
-    private var photoFragment: PhotoFragment? = null
+    private var fragmentPhoto: FragmentPhoto? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +39,7 @@ class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.nav_camera_fragment) {
-            startActivity(intentFor<MainActivity>().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            startActivity(intentFor<ActivityCamera>().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             finish()
         } else if (id == R.id.nav_photo_fragment) {
             switchFragmentTo(FragmentId.PHOTO)
@@ -56,15 +55,15 @@ class PhotoActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         val fragment = fragmentManager.findFragmentByTag(fragmentId.name)
         if (fragmentId == FragmentId.PHOTO) {
-            if (fragment is PhotoFragment)
+            if (fragment is FragmentPhoto)
                 fragmentManager.popBackStack()
             else {
-                photoFragment = PhotoFragment()
-                fragmentManager.addFragment(R.id.container, photoFragment as PhotoFragment, fragmentId.name)
+                fragmentPhoto = FragmentPhoto()
+                fragmentManager.addFragment(R.id.container, fragmentPhoto as FragmentPhoto, fragmentId.name)
             }
         } else if (fragmentId == FragmentId.SHARE) {
-            photoFragment?.saveBitmapHidden(finalImageUrl)
-            fragmentManager.addFragment(R.id.container, ShareFragment(), FragmentId.SHARE.name)
+            fragmentPhoto?.saveBitmapHidden(finalImageUrl)
+            fragmentManager.addFragment(R.id.container, FragmentShare(), FragmentId.SHARE.name)
         }
     }
 
