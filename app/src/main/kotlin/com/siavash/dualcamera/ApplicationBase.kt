@@ -2,8 +2,9 @@ package com.siavash.dualcamera
 
 import android.app.Application
 import android.content.pm.PackageManager
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
+import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
+import io.fabric.sdk.android.Fabric
 
 /**
  * Created by sia on 11/11/15.
@@ -20,5 +21,6 @@ class ApplicationBase : Application() {
         appName = packageManager.getApplicationLabel(appInfo) as String
 
         Fabric.with(this, Crashlytics());
+        Fabric.with(this, Answers());
     }
 }
