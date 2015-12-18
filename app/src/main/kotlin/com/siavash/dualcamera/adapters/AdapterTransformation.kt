@@ -1,6 +1,5 @@
 package com.siavash.dualcamera.adapters
 
-import android.os.AsyncTask
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +22,7 @@ class AdapterTransformation(val parent: FragmentPhoto, val dataSet: List<Transfo
     private val callback: OnTransformationTypeListener by lazy { parent }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder? {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_tranformation, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_transformation, parent, false)
         return ItemViewHolder(view)
     }
 

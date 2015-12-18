@@ -4,19 +4,25 @@ import android.app.Activity
 import android.app.Fragment
 import android.app.FragmentManager
 import android.app.ProgressDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Environment
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.siavash.dualcamera.ApplicationBase
 import com.siavash.dualcamera.R
-import jp.wasabeef.glide.transformations.*
+import jp.wasabeef.glide.transformations.CropCircleTransformation
+import jp.wasabeef.glide.transformations.GrayscaleTransformation
+import jp.wasabeef.glide.transformations.MaskTransformation
+import jp.wasabeef.glide.transformations.gpu.*
+import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -25,9 +31,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 
-const val orientation = 90
 const val compressQuality = 90
-const val finalImageUrl = ".dualImageUrl"
 
 // thread pool and thread related vars
 private val coreCount = Runtime.getRuntime().availableProcessors()
@@ -42,6 +46,46 @@ const val longAnimTime = 600L
 // camera images path
 val frontImagePath = getExternalApplicationStorage() + File.separator + CameraId.FRONT.address
 val backImagePath = getExternalApplicationStorage() + File.separator + CameraId.BACK.address
+val finalImagePath = getExternalApplicationStorage() + File.separator + ".dualImageUrl"
+
+val frontImageOrientation = -90
+val backImageOrientation = 90
+
+// shared preferences
+val commentKey = "commentKey"
+val commentCounter = 5
+
+fun setCommentCounter(context: Context, value: Int = commentCounter) {
+    context.defaultSharedPreferences.edit().putInt(commentKey, value).apply()
+}
+
+fun getCommentCounter(context: Context): Int {
+    return context.defaultSharedPreferences.getInt(commentKey, 0)
+}
+
+fun isCommentAllowed(context: Context): Boolean {
+    val value = getCommentCounter(context)
+    if (value > 0) {
+        setCommentCounter(context, value - 1)
+        return false
+    } else {
+        setCommentCounter(context)
+        return true
+    }
+}
+
+fun sendIntentForCommentInCafeBazaar(context: Context) {
+    if (isCommentAllowed(context)) {
+        try {
+            val intent = Intent(Intent.ACTION_EDIT);
+            intent.setData(Uri.parse("bazaar://details?id=" + context.packageName));
+            intent.setPackage("com.farsitel.bazaar");
+            context.startActivity(intent);
+        } catch(e: ActivityNotFoundException) {
+            Toast.makeText(context, "بازار نصب نیست!", Toast.LENGTH_LONG).show()
+        }
+    }
+}
 
 fun getExternalApplicationStorage(): String {
     return getExternalStorageDirectoryPath(ApplicationBase.appName)
@@ -76,42 +120,6 @@ fun Bitmap.encodeBitmap(targetFile: File): String {
     this.compress(Bitmap.CompressFormat.JPEG, compressQuality, FileOutputStream(targetFile))
     return targetFile.absolutePath
 }
-
-/**
- * Loads sampled bitmap from file
- * @param imagePath File path which contains bitmap
- * @param reqWidth Requested width
- * @param reqHeight Requested height
- * @return decoded bitmap
- */
-fun decodeSampledBitmap(imagePath: String, reqWidth: Int, reqHeight: Int): Bitmap {
-    // first decode check the raw image dimensions
-    val options = BitmapFactory.Options()
-    options.inJustDecodeBounds = true
-    BitmapFactory.decodeFile(imagePath, options)
-
-    // calculate the factor to scale down by depending on the desired height
-    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
-    options.inScaled = false
-    options.inJustDecodeBounds = false
-
-    return BitmapFactory.decodeFile(imagePath, options)
-}
-
-private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-    val height = options.outHeight
-    val width = options.outWidth
-    var inSampleSize = 1
-
-    if (height > reqHeight || width > reqWidth) {
-        val halfHeight = height / 2
-        val halfWidth = width / 2
-
-        while ((halfHeight / inSampleSize > reqHeight) && (halfWidth / inSampleSize > halfWidth)) inSampleSize *= 2
-    }
-    return inSampleSize
-}
-
 
 /**
  * Copies file from source to destination
@@ -185,7 +193,7 @@ fun FloatArray.minElementIndex(): Int? {
 
 inline fun doAsyncAndWait(ctx: Context, message: String, crossinline function: () -> Unit) {
     val progressDialog = ProgressDialog(ctx)
-    progressDialog.setMessage("در حال پردازش داب شما!")
+    progressDialog.setMessage(message)
     progressDialog.setCancelable(false)
     progressDialog.show()
     executor.execute { function() }
@@ -209,51 +217,102 @@ fun dip2px(ctx: Context, dp: Float): Int {
 
 fun ImageView.setImageWithTransformation(path: String, transformationType: TransformationType) {
     when (transformationType) {
-        TransformationType.Mask ->
+        TransformationType.Star ->
             Glide.with(context).load(path)
                     .fitCenter()
-                    .bitmapTransform(CenterCrop(context), MaskTransformation(context, R.drawable.mask_starfish))
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , MaskTransformation(context, R.drawable.mask_starfish))
                     .into(this)
 
-        TransformationType.NinePatchMask ->
+        TransformationType.Messenger ->
             Glide.with(context).load(path)
                     .fitCenter()
-                    .bitmapTransform(CenterCrop(context), MaskTransformation(context, R.drawable.mask_chat_right))
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , MaskTransformation(context, R.drawable.mask_chat_right))
                     .into(this)
 
-        TransformationType.CropTop ->
+        TransformationType.Flower ->
             Glide.with(context).load(path)
-                    .bitmapTransform(CropTransformation(context, 30, 30, CropTransformation.CropType.TOP))
-                    .into(this)
-
-        TransformationType.CropCenter ->
-            Glide.with(context).load(path)
-                    .bitmapTransform(CropTransformation(context, 30, 30))
-                    .into(this)
-
-        TransformationType.CropBottom ->
-            Glide.with(context).load(path)
-                    .bitmapTransform(CropTransformation(context, 30, 30, CropTransformation.CropType.BOTTOM))
-                    .into(this)
-
-        TransformationType.CropSquare ->
-            Glide.with(context).load(path)
-                    .bitmapTransform(CropSquareTransformation(context))
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , MaskTransformation(context, R.drawable.flower))
                     .into(this)
 
         TransformationType.CropCircle ->
             Glide.with(context).load(path)
-                    .bitmapTransform(CropCircleTransformation(context))
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , CropCircleTransformation(context))
                     .into(this)
 
         TransformationType.GrayScale ->
             Glide.with(context).load(path)
-                    .bitmapTransform(GrayscaleTransformation(context))
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , GrayscaleTransformation(context))
                     .into(this)
 
-        TransformationType.RoundedCorners ->
+        TransformationType.Vignette ->
             Glide.with(context).load(path)
-                    .bitmapTransform(RoundedCornersTransformation(context, 3, 0, RoundedCornersTransformation.CornerType.BOTTOM))
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , VignetteFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Brightness ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , BrightnessFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Swirl ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , SwirlFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Sketch ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , SketchFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Pixelation ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , PixelationFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Invert ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , InvertFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Contrast ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , ContrastFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Sepia ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , SepiaFilterTransformation(context))
+                    .into(this)
+
+        TransformationType.Toon ->
+            Glide.with(context).load(path)
+                    .fitCenter()
+                    .bitmapTransform(RotateTransformation(context, frontImageOrientation)
+                            , ToonFilterTransformation(context))
                     .into(this)
     }
 }
