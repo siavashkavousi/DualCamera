@@ -1,47 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scroll_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/grey_dark"
-    android:descendantFocusability="afterDescendants"
-    android:fillViewport="true">
+    android:layout_height="wrap_content"
+    android:background="@color/grey_dark">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:id="@+id/photo_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
 
-        <RelativeLayout
-            android:id="@+id/photo_layout"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/photo_back"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+            android:adjustViewBounds="true"
+            tools:ignore="contentDescription"/>
 
-            <ImageView
-                android:id="@+id/photo_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:adjustViewBounds="true"
-                tools:ignore="contentDescription" />
+        <ImageView
+            android:id="@+id/photo_front"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:adjustViewBounds="true"
+            tools:ignore="contentDescription"/>
 
-            <com.siavash.dualcamera.util.customviews.RoundedImageView
-                android:id="@+id/photo_front"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:paddingBottom="8dp"
-                android:paddingEnd="8dp"
-                android:paddingLeft="4dp"
-                android:paddingRight="8dp"
-                android:paddingStart="4dp"
-                android:paddingTop="4dp"
-                tools:ignore="contentDescription" />
-
-        </RelativeLayout>
     </RelativeLayout>
 
-</ScrollView>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/transformation_list"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/grey"
+        android:visibility="invisible"/>
+</RelativeLayout>

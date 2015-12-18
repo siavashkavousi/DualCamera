@@ -6,10 +6,8 @@ import android.view.SurfaceView
 import android.widget.ImageButton
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.Preview
-import com.siavash.dualcamera.util.CameraId
-import com.siavash.dualcamera.util.bindView
-import com.siavash.dualcamera.util.cameraPhotoDoneSignal
-import com.siavash.dualcamera.util.executor
+import com.siavash.dualcamera.util.*
+import org.jetbrains.anko.ctx
 import org.jetbrains.anko.startActivity
 
 class ActivityCamera : AppCompatActivity() {
@@ -70,5 +68,11 @@ class ActivityCamera : AppCompatActivity() {
             preview.takePicture({ preview.releaseCamera() }, { shutter.isClickable = true })
             startActivity<ActivityPhoto>()
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        preview.releaseCamera()
+        sendIntentForCommentInCafeBazaar(ctx)
     }
 }

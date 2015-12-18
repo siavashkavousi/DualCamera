@@ -34,10 +34,6 @@ enum class Swipe() {
 }
 
 enum class TransformationType {
-    Mask, NinePatchMask, CropTop, CropCenter, CropBottom, CropSquare, CropCircle, GrayScale, RoundedCorners
-}
-
-enum class TransformationTypee {
-    Mask, NinePatchMask, CropTop, CropCenter, CropBottom, CropSquare, CropCircle, ColorFilter, Grayscale,
-    RoundedCorners, Blur, Toon, Sepia, Contrast, Invert, Pixel, Sketch, Swirl, Brightness, Kuawahara, Vignette
+    CropCircle, GrayScale, Flower, Star, Messenger, Vignette, Brightness, Swirl, Sketch, Pixelation, Invert,
+    Contrast, Sepia, Toon
 }

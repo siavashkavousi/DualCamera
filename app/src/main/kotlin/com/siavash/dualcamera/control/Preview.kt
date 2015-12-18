@@ -4,10 +4,7 @@ import android.os.Build
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import com.siavash.dualcamera.util.CameraId
-import com.siavash.dualcamera.util.cameraPhotoDoneSignal
-import com.siavash.dualcamera.util.executor
-import com.siavash.dualcamera.util.getExternalApplicationStorage
+import com.siavash.dualcamera.util.*
 import java.io.File
 import java.io.FileOutputStream
 
@@ -17,7 +14,7 @@ import java.io.FileOutputStream
 class Preview : SurfaceHolder.Callback {
     private lateinit var cameraController: CameraController
     private lateinit var holder: SurfaceHolder
-    lateinit var cameraId : CameraId
+    lateinit var cameraId: CameraId
 
     constructor(surfaceView: SurfaceView) {
         holder = surfaceView.holder
@@ -53,7 +50,6 @@ class Preview : SurfaceHolder.Callback {
 
     private fun saveTakenPicture(data: ByteArray) {
         executor.execute {
-            Log.d("Preview", "thread " + Thread.currentThread())
             val outputStream = FileOutputStream(File(getExternalApplicationStorage(), cameraId.address))
             outputStream.use { outputStream.write(data) }
             cameraPhotoDoneSignal.countDown()
@@ -62,12 +58,9 @@ class Preview : SurfaceHolder.Callback {
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        cameraController.stopPreview()
-        cameraController.release()
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {

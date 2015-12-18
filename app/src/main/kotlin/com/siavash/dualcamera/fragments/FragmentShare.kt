@@ -13,16 +13,18 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import com.siavash.dualcamera.R
-import com.siavash.dualcamera.activities.PhotoActivity
+import com.siavash.dualcamera.activities.ActivityPhoto
 import com.siavash.dualcamera.util.*
 import org.jetbrains.anko.act
+import org.jetbrains.anko.ctx
 import java.io.File
 
 /**
  * Created by sia on 11/2/15.
  */
-class ShareFragment : Fragment() {
+class FragmentShare : Fragment() {
     private val socialNetworks: List<Button> by bindViews(R.id.facebook, R.id.whatsapp, R.id.telegram, R.id.instagram, R.id.line, R.id.more)
     private val shareText: TextView by bindView(R.id.share_to)
     private val image: ImageView by bindView(R.id.photo_container)
@@ -31,7 +33,7 @@ class ShareFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_share, container, false)
-        if (act is PhotoActivity) setUpToolbar()
+        if (act is ActivityPhoto) setUpToolbar()
         displaySize = getDisplaySize(act)
         return view
     }
@@ -39,18 +41,22 @@ class ShareFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        loadBitmapData()
+        loadBitmap()
         setTypefaces()
         setListeners()
     }
 
-    private fun loadBitmapData() {
-        image.setImageBitmap(Util.decodeSampledBitmap(File(getExternalApplicationStorage(), finalImageUrl), displaySize.x, displaySize.y))
+    private fun loadBitmap() {
+        Glide.with(ctx).load(finalImagePath)
+                .fitCenter()
+                .crossFade()
+                .into(image)
     }
 
     private fun setUpToolbar() {
-        val toolbar = (act as PhotoActivity).toolbar
+        val toolbar = (act as ActivityPhoto).toolbar
         toolbar.setTitle("اشتراک گذاری")
+        toolbar.setLeftItemVisibility(View.GONE)
     }
 
     private fun setTypefaces() {
@@ -70,7 +76,7 @@ class ShareFragment : Fragment() {
     private fun shareIntent(intentName: String, socialName: String) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.setType("image/jpg")
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(getExternalApplicationStorage(), finalImageUrl)))
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(finalImagePath)))
         generateCustomIntent(intent, intentName, socialName)
     }
 
@@ -111,7 +117,7 @@ class ShareFragment : Fragment() {
             } else if (id == socialNetworks[5].id) {
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.setType("image/jpg")
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(getExternalApplicationStorage(), finalImageUrl)))
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(finalImagePath)))
                 startActivity(intent)
             }
         }
