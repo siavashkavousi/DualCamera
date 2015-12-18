@@ -6,15 +6,12 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import com.siavash.dualcamera.R
 import org.jetbrains.anko.layoutInflater
 import org.jetbrains.anko.onClick
 import org.jetbrains.anko.wrapContent
-import java.util.jar.Attributes
 
 /**
  * Created by sia on 11/16/15.
@@ -55,25 +52,25 @@ class Toolbar : Toolbar {
         title.typeface = getFont(context, Font.AFSANEH)
     }
 
-    fun setRightItemVisibility(visibility: Int) {
-        right.visibility = visibility
+    fun setLeftItemVisibility(visibility: Int) {
+        left.visibility = visibility
+    }
+
+    inline fun setLeftAction(crossinline function: () -> Unit) {
+        if (left.visibility != VISIBLE) setLeftItemVisibility(VISIBLE)
+        left.onClick {
+            function()
+        }
     }
 
     inline fun setRightAction(crossinline function: () -> Unit) {
-        if (right.visibility != VISIBLE) setRightItemVisibility(VISIBLE)
         right.onClick {
             function()
         }
     }
 
-    inline fun setLeftAction(crossinline function: () -> Unit) {
-        left.onClick {
-            function()
-        }
-    }
-
     fun defaultHamburgerAction(drawer: DrawerLayout) {
-        left.onClick {
+        right.onClick {
             if (drawer.isDrawerOpen(GravityCompat.END)) {
                 drawer.closeDrawer(GravityCompat.END)
             } else {

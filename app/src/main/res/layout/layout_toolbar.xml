@@ -2,42 +2,43 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <RelativeLayout
-        android:background="@color/primary"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
         android:orientation="horizontal">
 
         <ImageButton
-            android:background="@null"
-            android:id="@+id/toolbar_left"
+            android:id="@+id/toolbar_right"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_width="?attr/actionBarSize"
+            android:background="@null"
             android:padding="8dp"
             android:src="@drawable/ic_hamburger"/>
 
         <TextView
             android:id="@+id/toolbar_title"
-            android:layout_centerVertical="true"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/toolbar_left"
-            android:layout_toStartOf="@+id/toolbar_left"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/toolbar_right"
+            android:layout_toStartOf="@+id/toolbar_right"
             android:text="@string/app_name"
             android:textColor="@android:color/white"
             android:textSize="20sp"/>
 
         <ImageButton
-            android:background="@null"
-            android:id="@+id/toolbar_right"
+            android:id="@+id/toolbar_left"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_width="?attr/actionBarSize"
+            android:background="@null"
             android:padding="8dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_save"
+            android:visibility="visible"/>
     </RelativeLayout>
 </merge>
