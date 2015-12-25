@@ -13,7 +13,6 @@ import java.io.FileOutputStream
 class Preview : SurfaceHolder.Callback {
     private lateinit var cameraController: CameraController
     private lateinit var holder: SurfaceHolder
-    lateinit var cameraId: CameraId
 
     constructor(surfaceView: SurfaceView) {
         holder = surfaceView.holder
@@ -30,7 +29,6 @@ class Preview : SurfaceHolder.Callback {
     }
 
     fun openCamera(cameraId: CameraId) {
-        this.cameraId = cameraId
         cameraController.open(cameraId)
     }
 
@@ -39,21 +37,23 @@ class Preview : SurfaceHolder.Callback {
         cameraController.release()
     }
 
-    fun takePicture(atTheBeginning: () -> Unit = {}, inTheEnd: () -> Unit = {}) {
+    fun takePicture(cameraId: CameraId, atTheBeginning: () -> Unit = {}, inTheEnd: () -> Unit = {}) {
+        fun saveTakenPicture(data: ByteArray) {
+            executor.execute {
+                d("save taken picture with cameraId: " + cameraId)
+                val outputStream = FileOutputStream(File(getExternalApplicationStorage(), cameraId.address))
+                outputStream.use { outputStream.write(data) }
+                cameraPhotoDoneSignal.countDown()
+                System.gc()
+                d("save taken picture end...")
+            }
+        }
+
         cameraController.takePicture { data ->
             d("camera takePicture called")
             atTheBeginning()
             saveTakenPicture(data)
             inTheEnd()
-        }
-    }
-
-    private fun saveTakenPicture(data: ByteArray) {
-        executor.execute {
-            val outputStream = FileOutputStream(File(getExternalApplicationStorage(), cameraId.address))
-            outputStream.use { outputStream.write(data) }
-            cameraPhotoDoneSignal.countDown()
-            System.gc()
         }
     }
 

@@ -64,9 +64,9 @@ class ActivityCamera : AppCompatActivity() {
     private fun takePicture() {
         shutter.isClickable = false
         if (cameraId == CameraId.FRONT) {
-            preview.takePicture({ switchCamera() }, { shutter.isClickable = true })
+            preview.takePicture(CameraId.FRONT, { switchCamera() }, { shutter.isClickable = true })
         } else {
-            preview.takePicture({ preview.releaseCamera() }, { shutter.isClickable = true })
+            preview.takePicture(CameraId.BACK, { preview.releaseCamera() }, { shutter.isClickable = true })
             cameraId = CameraId.FRONT
             startActivity<ActivityPhoto>()
         }
