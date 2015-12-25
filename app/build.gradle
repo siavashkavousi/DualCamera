@@ -46,7 +46,7 @@ dependencies {
     compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.3.0'
 }
 buildscript {
-    ext.kotlin_version = '1.0.0-beta-3595'
+    ext.kotlin_version = '1.0.0-beta-4583'
     ext.anko_version = '0.8'
     repositories {
         mavenCentral()
