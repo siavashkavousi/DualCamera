@@ -73,6 +73,7 @@ class FragmentPhoto : Fragment(), SimpleSwipeGestureListener, OnTransformationTy
     private fun waitForComputationThreads() {
         executor.execute {
             cameraPhotoDoneSignal.await()
+            cameraPhotoDoneSignal.reset()
             d("waitForComputation is finished")
             onUiThread { loadBitmaps() }
         }

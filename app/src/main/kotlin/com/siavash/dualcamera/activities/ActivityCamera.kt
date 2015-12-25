@@ -6,7 +6,10 @@ import android.view.SurfaceView
 import android.widget.ImageButton
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.Preview
-import com.siavash.dualcamera.util.*
+import com.siavash.dualcamera.util.CameraId
+import com.siavash.dualcamera.util.bindView
+import com.siavash.dualcamera.util.executor
+import com.siavash.dualcamera.util.sendIntentForCommentInCafeBazaar
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.startActivity
 
@@ -19,8 +22,6 @@ class ActivityCamera : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        cameraPhotoDoneSignal.reset()
-        cameraId = CameraId.FRONT
         safeOpenCameraAndPreview(cameraId)
     }
 
@@ -39,8 +40,8 @@ class ActivityCamera : AppCompatActivity() {
             preview.startPreview()
         }
 
+        preview.releaseCamera()
         executor.execute {
-            preview.releaseCamera()
             try {
                 cameraOpenAndPreview()
             } catch(e: RuntimeException) {
@@ -66,6 +67,7 @@ class ActivityCamera : AppCompatActivity() {
             preview.takePicture({ switchCamera() }, { shutter.isClickable = true })
         } else {
             preview.takePicture({ preview.releaseCamera() }, { shutter.isClickable = true })
+            cameraId = CameraId.FRONT
             startActivity<ActivityPhoto>()
         }
     }

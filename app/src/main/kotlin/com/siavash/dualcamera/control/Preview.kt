@@ -1,7 +1,6 @@
 package com.siavash.dualcamera.control
 
 import android.os.Build
-import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.siavash.dualcamera.util.*
@@ -42,6 +41,7 @@ class Preview : SurfaceHolder.Callback {
 
     fun takePicture(atTheBeginning: () -> Unit = {}, inTheEnd: () -> Unit = {}) {
         cameraController.takePicture { data ->
+            d("camera takePicture called")
             atTheBeginning()
             saveTakenPicture(data)
             inTheEnd()
