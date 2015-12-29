@@ -1,9 +1,9 @@
-package com.siavash.dualcamera.util
+package com.siavash.dualcamera.utils
 
 import android.hardware.Camera
 
 /**
- * Created by sia on 10/25/15.
+ * Created by sia on 12/29/15.
  */
 enum class FragmentId {
     CAMERA_BACK, CAMERA_FRONT, PHOTO, SHARE, ABOUT

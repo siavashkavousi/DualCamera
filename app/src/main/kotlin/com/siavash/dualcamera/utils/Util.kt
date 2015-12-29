@@ -1,4 +1,4 @@
-package com.siavash.dualcamera.util
+package com.siavash.dualcamera.utils
 
 import android.app.Activity
 import android.app.Fragment
@@ -18,6 +18,7 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.siavash.dualcamera.ApplicationBase
 import com.siavash.dualcamera.R
+import com.siavash.dualcamera.utils.ResettableCountDownLatch
 import jp.wasabeef.glide.transformations.CropCircleTransformation
 import jp.wasabeef.glide.transformations.GrayscaleTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
@@ -48,12 +49,12 @@ val frontImagePath = getExternalApplicationStorage() + File.separator + CameraId
 val backImagePath = getExternalApplicationStorage() + File.separator + CameraId.BACK.address
 val finalImagePath = getExternalApplicationStorage() + File.separator + ".dualImageUrl"
 
-val frontImageOrientation = -90
-val backImageOrientation = 90
+const val frontImageOrientation = -90
+const val backImageOrientation = 90
 
 // shared preferences
-val commentKey = "commentKey"
-val commentCounter = 5
+const val commentKey = "commentKey"
+const val commentCounter = 5
 
 fun setCommentCounter(context: Context, value: Int = commentCounter) {
     context.defaultSharedPreferences.edit().putInt(commentKey, value).apply()

@@ -1,7 +1,7 @@
 package com.siavash.dualcamera.control
 
 import android.view.SurfaceHolder
-import com.siavash.dualcamera.util.CameraId
+import com.siavash.dualcamera.utils.CameraId
 
 /**
  * Created by sia on 12/4/15.

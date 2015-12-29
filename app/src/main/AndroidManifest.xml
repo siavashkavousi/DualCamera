@@ -26,7 +26,6 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activities.ActivityCamera"
-            android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -42,7 +41,7 @@
             android:name="io.fabric.ApiKey"
             android:value="240c60c0cc50341b30fed0c29f6ed25f0bf77edf"/>
         <meta-data
-            android:name="com.siavash.dualcamera.util.GlideModule"
+            android:name="com.siavash.dualcamera.utils.GlideModule"
             android:value="GlideModule"/>
     </application>
 

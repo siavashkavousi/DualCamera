@@ -1,4 +1,4 @@
-package com.siavash.dualcamera.util;
+package com.siavash.dualcamera.utils;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;

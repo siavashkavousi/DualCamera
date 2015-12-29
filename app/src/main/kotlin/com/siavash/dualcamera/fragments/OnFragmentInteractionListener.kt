@@ -1,6 +1,6 @@
 package com.siavash.dualcamera.fragments
 
-import com.siavash.dualcamera.util.FragmentId
+import com.siavash.dualcamera.utils.FragmentId
 
 /**
  * Created by sia on 10/25/15.

@@ -3,7 +3,7 @@ package com.siavash.dualcamera.control
 import android.os.Build
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import com.siavash.dualcamera.util.*
+import com.siavash.dualcamera.utils.*
 import java.io.File
 import java.io.FileOutputStream
 

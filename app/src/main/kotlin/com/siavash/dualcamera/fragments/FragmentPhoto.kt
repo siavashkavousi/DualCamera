@@ -20,7 +20,8 @@ import com.bumptech.glide.Glide
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.activities.ActivityPhoto
 import com.siavash.dualcamera.adapters.AdapterTransformation
-import com.siavash.dualcamera.util.*
+import com.siavash.dualcamera.utils.SpacesItemDecoration
+import com.siavash.dualcamera.utils.*
 import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.onUiThread

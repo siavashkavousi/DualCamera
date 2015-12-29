@@ -11,7 +11,7 @@ import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.FragmentPhoto
 import com.siavash.dualcamera.fragments.FragmentShare
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener
-import com.siavash.dualcamera.util.*
+import com.siavash.dualcamera.utils.*
 import org.jetbrains.anko.intentFor
 
 /**

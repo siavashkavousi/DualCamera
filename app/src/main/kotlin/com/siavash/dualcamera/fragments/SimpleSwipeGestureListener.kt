@@ -1,6 +1,6 @@
 package com.siavash.dualcamera.fragments
 
-import com.siavash.dualcamera.util.Swipe
+import com.siavash.dualcamera.utils.Swipe
 
 /**
  * Created by sia on 12/8/15.

@@ -9,10 +9,10 @@ import android.widget.TextView
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.FragmentPhoto
 import com.siavash.dualcamera.fragments.OnTransformationTypeListener
-import com.siavash.dualcamera.util.TransformationType
-import com.siavash.dualcamera.util.bindView
-import com.siavash.dualcamera.util.frontImagePath
-import com.siavash.dualcamera.util.setImageWithTransformation
+import com.siavash.dualcamera.utils.TransformationType
+import com.siavash.dualcamera.utils.bindView
+import com.siavash.dualcamera.utils.frontImagePath
+import com.siavash.dualcamera.utils.setImageWithTransformation
 import org.jetbrains.anko.onClick
 
 /**

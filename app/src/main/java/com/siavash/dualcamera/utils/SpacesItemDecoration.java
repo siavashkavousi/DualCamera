@@ -1,4 +1,4 @@
-package com.siavash.dualcamera.util;
+package com.siavash.dualcamera.utils;
 
 import android.graphics.Rect;
 import android.support.v7.widget.GridLayoutManager;
