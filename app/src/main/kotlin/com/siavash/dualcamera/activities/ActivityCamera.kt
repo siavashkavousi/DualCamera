@@ -8,8 +8,8 @@ import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.Preview
 import com.siavash.dualcamera.utils.CameraId
 import com.siavash.dualcamera.utils.bindView
-import com.siavash.dualcamera.utils.executor
 import com.siavash.dualcamera.utils.sendIntentForCommentInCafeBazaar
+import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.startActivity
 
@@ -29,7 +29,7 @@ class ActivityCamera : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        preview = Preview(container)
+        preview = Preview(act, container)
 
         shutter.setOnClickListener { takePicture() }
     }
@@ -41,14 +41,13 @@ class ActivityCamera : AppCompatActivity() {
         }
 
         preview.releaseCamera()
-        executor.execute {
-            try {
-                cameraOpenAndPreview()
-            } catch(e: RuntimeException) {
-                preview.releaseCamera()
-                cameraOpenAndPreview()
-            }
+        try {
+            cameraOpenAndPreview()
+        } catch(e: RuntimeException) {
+            preview.releaseCamera()
+            cameraOpenAndPreview()
         }
+
     }
 
     private fun switchCamera() {
