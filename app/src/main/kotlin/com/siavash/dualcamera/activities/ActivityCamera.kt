@@ -26,11 +26,31 @@ class ActivityCamera : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        fun takePicture() {
+            fun switchCamera() {
+                if (cameraId == CameraId.FRONT) {
+                    cameraId = CameraId.BACK
+                    safeOpenCameraAndPreview(cameraId)
+                } else {
+                    cameraId = CameraId.FRONT
+                    safeOpenCameraAndPreview(cameraId)
+                }
+            }
+
+            shutter.isClickable = false
+            if (cameraId == CameraId.FRONT) {
+                preview.takePicture(CameraId.FRONT, { switchCamera() }, { shutter.isClickable = true })
+            } else {
+                preview.takePicture(CameraId.BACK, { preview.releaseCamera() }, { shutter.isClickable = true })
+                cameraId = CameraId.FRONT
+                startActivity<ActivityPhoto>()
+            }
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         preview = Preview(act, container)
-
         shutter.setOnClickListener { takePicture() }
     }
 
@@ -48,27 +68,6 @@ class ActivityCamera : AppCompatActivity() {
             cameraOpenAndPreview()
         }
 
-    }
-
-    private fun switchCamera() {
-        if (cameraId == CameraId.FRONT) {
-            cameraId = CameraId.BACK
-            safeOpenCameraAndPreview(cameraId)
-        } else {
-            cameraId = CameraId.FRONT
-            safeOpenCameraAndPreview(cameraId)
-        }
-    }
-
-    private fun takePicture() {
-        shutter.isClickable = false
-        if (cameraId == CameraId.FRONT) {
-            preview.takePicture(CameraId.FRONT, { switchCamera() }, { shutter.isClickable = true })
-        } else {
-            preview.takePicture(CameraId.BACK, { preview.releaseCamera() }, { shutter.isClickable = true })
-            cameraId = CameraId.FRONT
-            startActivity<ActivityPhoto>()
-        }
     }
 
     override fun onBackPressed() {

@@ -51,6 +51,13 @@ class ActivityPhoto : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     }
 
     override fun switchFragmentTo(fragmentId: FragmentId, vararg optionalValues: String) {
+        fun getCurrentFragmentTag(): String? {
+            if (fragmentManager.backStackEntryCount > 0) {
+                return fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
+            } else
+                return ""
+        }
+
         if (fragmentId.name == getCurrentFragmentTag()) return
 
         val fragment = fragmentManager.findFragmentByTag(fragmentId.name)
@@ -65,12 +72,5 @@ class ActivityPhoto : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             fragmentPhoto?.saveBitmap(finalImagePath)
             fragmentManager.addFragment(R.id.container, FragmentShare(), FragmentId.SHARE.name)
         }
-    }
-
-    private fun getCurrentFragmentTag(): String? {
-        if (fragmentManager.backStackEntryCount > 0) {
-            return fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
-        } else
-            return ""
     }
 }

@@ -32,6 +32,12 @@ class FragmentShare : Fragment() {
     private lateinit var displaySize: Point
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        fun setUpToolbar() {
+            val toolbar = (act as ActivityPhoto).toolbar
+            toolbar.setTitle("اشتراک گذاری")
+            toolbar.setLeftItemVisibility(View.GONE)
+        }
+
         val view = inflater.inflate(R.layout.fragment_share, container, false)
         if (act is ActivityPhoto) setUpToolbar()
         displaySize = getDisplaySize(act)
@@ -39,6 +45,27 @@ class FragmentShare : Fragment() {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        fun loadBitmap() {
+            Glide.with(ctx).load(finalImagePath)
+                    .fitCenter()
+                    .crossFade()
+                    .into(image)
+        }
+
+        fun setTypefaces() {
+            shareText.typeface = getFont(activity, Font.AFSANEH)
+            for (button in socialNetworks) {
+                button.typeface = getFont(activity, Font.NAZANIN_BOLD)
+            }
+        }
+
+        fun setListeners() {
+            val onClickListener = OnClickListener()
+            for (item in socialNetworks) {
+                item.setOnClickListener(onClickListener)
+            }
+        }
+
         super.onActivityCreated(savedInstanceState)
 
         loadBitmap()
@@ -46,60 +73,6 @@ class FragmentShare : Fragment() {
         setListeners()
     }
 
-    private fun loadBitmap() {
-        Glide.with(ctx).load(finalImagePath)
-                .fitCenter()
-                .crossFade()
-                .into(image)
-    }
-
-    private fun setUpToolbar() {
-        val toolbar = (act as ActivityPhoto).toolbar
-        toolbar.setTitle("اشتراک گذاری")
-        toolbar.setLeftItemVisibility(View.GONE)
-    }
-
-    private fun setTypefaces() {
-        shareText.typeface = getFont(activity, Font.AFSANEH)
-        for (button in socialNetworks) {
-            button.typeface = getFont(activity, Font.NAZANIN_BOLD)
-        }
-    }
-
-    private fun setListeners() {
-        val onClickListener = OnClickListener()
-        for (item in socialNetworks) {
-            item.setOnClickListener(onClickListener)
-        }
-    }
-
-    private fun shareIntent(intentName: String, socialName: String) {
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.setType("image/jpg")
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(finalImagePath)))
-        generateCustomIntent(intent, intentName, socialName)
-    }
-
-
-    private fun generateCustomIntent(prototype: Intent, appNameToShareWith: String, appNameInPersian: String) {
-        val resInfo = activity.packageManager.queryIntentActivities(prototype, PackageManager.MATCH_DEFAULT_ONLY)
-        var resolved = false
-        if (!resInfo.isEmpty()) {
-            for (resolveInfo in resInfo) {
-                if (resolveInfo.activityInfo.name.contains(appNameToShareWith)) {
-                    prototype.setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name)
-                    resolved = true
-                    break
-                }
-            }
-        }
-
-        if (resolved)
-            startActivity(prototype)
-        else {
-            Toast.makeText(activity, appNameInPersian + " نصب نیست!", Toast.LENGTH_LONG).show()
-        }
-    }
 
     private inner class OnClickListener : View.OnClickListener {
         override fun onClick(v: View) {
@@ -120,6 +93,33 @@ class FragmentShare : Fragment() {
                 intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(finalImagePath)))
                 startActivity(intent)
             }
+        }
+
+        private fun shareIntent(intentName: String, socialName: String) {
+            fun generateCustomIntent(prototype: Intent, appNameToShareWith: String, appNameInPersian: String) {
+                val resInfo = activity.packageManager.queryIntentActivities(prototype, PackageManager.MATCH_DEFAULT_ONLY)
+                var resolved = false
+                if (!resInfo.isEmpty()) {
+                    for (resolveInfo in resInfo) {
+                        if (resolveInfo.activityInfo.name.contains(appNameToShareWith)) {
+                            prototype.setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name)
+                            resolved = true
+                            break
+                        }
+                    }
+                }
+
+                if (resolved)
+                    startActivity(prototype)
+                else {
+                    Toast.makeText(activity, appNameInPersian + " نصب نیست!", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.setType("image/jpg")
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(finalImagePath)))
+            generateCustomIntent(intent, intentName, socialName)
         }
     }
 }

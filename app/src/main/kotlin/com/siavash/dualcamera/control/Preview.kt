@@ -44,16 +44,16 @@ class Preview : SurfaceHolder.Callback {
     }
 
     fun takePicture(cameraId: CameraId, atTheBeginning: () -> Unit = {}, inTheEnd: () -> Unit = {}) {
-        fun createAlertDialog(): AlertDialog {
-            return AlertDialog.Builder(act)
-                    .setTitle("خطا")
-                    .setMessage("حافظه گوشی پر شده است")
-                    .setPositiveButton("باشه", { dialogInterface, i -> act.finish() })
-                    .setCancelable(false)
-                    .create()
-        }
-
         fun showAlertDialog() {
+            fun createAlertDialog(): AlertDialog {
+                return AlertDialog.Builder(act)
+                        .setTitle("خطا")
+                        .setMessage("حافظه گوشی پر شده است")
+                        .setPositiveButton("باشه", { dialogInterface, i -> act.finish() })
+                        .setCancelable(false)
+                        .create()
+            }
+
             act.onUiThread { createAlertDialog().show() }
         }
 

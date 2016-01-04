@@ -6,8 +6,6 @@ import android.animation.ValueAnimator
 import android.app.Fragment
 import android.app.ProgressDialog
 import android.content.Context
-import android.graphics.Matrix
-import android.graphics.PointF
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -43,6 +41,15 @@ class FragmentPhoto : Fragment(), SimpleSwipeGestureListener, OnTransformationTy
     private val transformationAdapter: AdapterTransformation by lazy { AdapterTransformation(this, transformationDataSet) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        fun setUpToolbar() {
+            val toolbar = (act as ActivityPhoto).toolbar
+            toolbar.setTitle("ویرایش عکس")
+            toolbar.setLeftItemVisibility(View.VISIBLE)
+            toolbar.setLeftAction {
+                saveBitmap(getOutputMediaFilePath())
+            }
+        }
+
         val view = inflater.inflate(R.layout.fragment_photo, container, false)
         if (act is ActivityPhoto) setUpToolbar()
         view.setOnTouchListener { view, event -> gestureDetector.onTouchEvent(event) }
@@ -50,6 +57,43 @@ class FragmentPhoto : Fragment(), SimpleSwipeGestureListener, OnTransformationTy
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        fun waitForComputationThreads() {
+            fun loadBitmaps() {
+                Glide.with(ctx).load(frontImagePath)
+                        .bitmapTransform(RotateTransformation(ctx, -90))
+                        .crossFade()
+                        .into(frontImageView)
+
+                Glide.with(ctx).load(backImagePath)
+                        .bitmapTransform(RotateTransformation(ctx, 90))
+                        .crossFade()
+                        .into(backImageView)
+
+                frontImageView.setOnTouchListener(OnTouchListener())
+                progressDialog.dismiss()
+                System.gc()
+            }
+
+            executor.execute {
+                cameraPhotoDoneSignal.await()
+                cameraPhotoDoneSignal.reset()
+                d("waitForComputation is finished")
+                onUiThread { loadBitmaps() }
+            }
+        }
+
+        fun setUpTransformationList() {
+            fun loadTransformationData() {
+                transformationDataSet.addAll(TransformationType.values())
+            }
+
+            transformationList.layoutManager = LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false)
+            loadTransformationData()
+            transformationList.adapter = transformationAdapter
+            transformationList.addItemDecoration(SpacesItemDecoration(4))
+            transformationList.setHasFixedSize(true)
+        }
+
         super.onActivityCreated(savedInstanceState)
 
         progressDialog.show()
@@ -59,90 +103,41 @@ class FragmentPhoto : Fragment(), SimpleSwipeGestureListener, OnTransformationTy
         setUpTransformationList()
     }
 
-    private fun setUpToolbar() {
-        val toolbar = (act as ActivityPhoto).toolbar
-        toolbar.setTitle("ویرایش عکس")
-        toolbar.setLeftItemVisibility(View.VISIBLE)
-        toolbar.setLeftAction {
-            saveBitmap(getOutputMediaFilePath())
-        }
-    }
-
-    private fun waitForComputationThreads() {
-        executor.execute {
-            cameraPhotoDoneSignal.await()
-            cameraPhotoDoneSignal.reset()
-            d("waitForComputation is finished")
-            onUiThread { loadBitmaps() }
-        }
-    }
-
-    private fun loadBitmaps() {
-        Glide.with(ctx).load(frontImagePath)
-                .bitmapTransform(RotateTransformation(ctx, -90))
-                .crossFade()
-                .into(frontImageView)
-
-        Glide.with(ctx).load(backImagePath)
-                .bitmapTransform(RotateTransformation(ctx, 90))
-                .crossFade()
-                .into(backImageView)
-
-        frontImageView.setOnTouchListener(OnTouchListener())
-        progressDialog.dismiss()
-        System.gc()
-    }
-
-    private fun setUpTransformationList() {
-        transformationList.layoutManager = LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false)
-        loadTransformationData()
-        transformationList.adapter = transformationAdapter
-        transformationList.addItemDecoration(SpacesItemDecoration(4))
-        transformationList.setHasFixedSize(true)
-    }
-
-    private fun loadTransformationData() {
-        transformationDataSet.addAll(TransformationType.values())
-    }
-
     override fun onSwipe(dir: Swipe) {
+        fun showTransformationList() {
+            transformationList.visibility = View.VISIBLE
+            val v = ValueAnimator.ofInt(0, dip2px(ctx, 120f))
+            v.setDuration(shortAnimTime)
+            v.interpolator = AccelerateInterpolator()
+            v.addUpdateListener { v ->
+                transformationList.layoutParams.height = v.animatedValue as Int
+                transformationList.requestLayout()
+            }
+            v.start()
+        }
+
+        fun hideTransformationList() {
+            val v = ValueAnimator.ofInt(dip2px(ctx, 120f), 0)
+            v.setDuration(shortAnimTime)
+            v.interpolator = DecelerateInterpolator()
+            v.addUpdateListener {
+                transformationList.layoutParams.height = v.animatedValue as Int
+                transformationList.requestLayout()
+            }
+            v.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    transformationList.visibility = View.INVISIBLE
+                }
+            })
+            v.start()
+        }
+
         when (dir) {
             Swipe.Up -> showTransformationList()
             Swipe.Down -> hideTransformationList()
         }
     }
 
-    private fun showTransformationList() {
-        transformationList.visibility = View.VISIBLE
-        val v = ValueAnimator.ofInt(0, dip2px(ctx, 120f))
-        v.setDuration(shortAnimTime)
-        v.interpolator = AccelerateInterpolator()
-        v.addUpdateListener { v ->
-            transformationList.layoutParams.height = v.animatedValue as Int
-            transformationList.requestLayout()
-        }
-        v.start()
-    }
-
-    private fun hideTransformationList() {
-        val v = ValueAnimator.ofInt(dip2px(ctx, 120f), 0)
-        v.setDuration(shortAnimTime)
-        v.interpolator = DecelerateInterpolator()
-        v.addUpdateListener {
-            transformationList.layoutParams.height = v.animatedValue as Int
-            transformationList.requestLayout()
-        }
-        v.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                transformationList.visibility = View.INVISIBLE
-            }
-        })
-        v.start()
-    }
-
-    /**
-     * save bitmap which is hidden with finalImageUrl name
-     */
     fun saveBitmap(address: String) {
         if (photoLayout.saveAsBitmap(File(address)) != null)
             toast("عکس شما ذخیره شد")
