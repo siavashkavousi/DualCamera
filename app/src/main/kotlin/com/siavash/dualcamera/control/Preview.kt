@@ -1,11 +1,15 @@
 package com.siavash.dualcamera.control
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.os.Build
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.siavash.dualcamera.utils.*
+import org.jetbrains.anko.onUiThread
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * Created by sia on 12/4/15.
@@ -13,8 +17,10 @@ import java.io.FileOutputStream
 class Preview : SurfaceHolder.Callback {
     private lateinit var cameraController: CameraController
     private lateinit var holder: SurfaceHolder
+    private lateinit var act: Activity
 
-    constructor(surfaceView: SurfaceView) {
+    constructor(act: Activity, surfaceView: SurfaceView) {
+        this.act = act
         holder = surfaceView.holder
         holder.addCallback(this)
 
@@ -38,11 +44,30 @@ class Preview : SurfaceHolder.Callback {
     }
 
     fun takePicture(cameraId: CameraId, atTheBeginning: () -> Unit = {}, inTheEnd: () -> Unit = {}) {
+        fun createAlertDialog(): AlertDialog {
+            return AlertDialog.Builder(act)
+                    .setTitle("خطا")
+                    .setMessage("حافظه گوشی پر شده است")
+                    .setPositiveButton("باشه", { dialogInterface, i -> act.finish() })
+                    .setCancelable(false)
+                    .create()
+        }
+
+        fun showAlertDialog() {
+            act.onUiThread { createAlertDialog().show() }
+        }
+
         fun saveTakenPicture(data: ByteArray) {
             executor.execute {
                 d("save taken picture with cameraId: " + cameraId)
                 val outputStream = FileOutputStream(File(getExternalApplicationStorage(), cameraId.address))
-                outputStream.use { outputStream.write(data) }
+                outputStream.use {
+                    try {
+                        outputStream.write(data)
+                    } catch(e: IOException) {
+                        showAlertDialog()
+                    }
+                }
                 cameraPhotoDoneSignal.countDown()
                 System.gc()
                 d("save taken picture end...")

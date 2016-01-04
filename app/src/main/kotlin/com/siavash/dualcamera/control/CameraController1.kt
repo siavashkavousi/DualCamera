@@ -13,6 +13,27 @@ class CameraController1() : CameraController() {
     private var camera: Camera? = null
 
     override fun open(cameraId: CameraId) {
+        fun Camera.setUp() {
+            fun Camera.Parameters.getPreferredPreviewSize(): Camera.Size {
+                fun List<Camera.Size>.getPreferredSize(): Camera.Size {
+                    val ratios = FloatArray(this.size)
+                    for (i in this.indices) {
+                        val width = this[i].width.toFloat()
+                        val height = this[i].height.toFloat()
+                        ratios[i] = if (width > height) width / height else height / width
+                    }
+                    return this[ratios.minElementIndex()!!]
+                }
+
+                return supportedPreviewSizes.getPreferredSize()
+            }
+
+            val preferredPreviewSize = parameters.getPreferredPreviewSize()
+            parameters.setPreviewSize(preferredPreviewSize.width, preferredPreviewSize.height)
+            if (parameters.supportedFlashModes != null) parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)
+            setDisplayOrientation(90)
+        }
+
         if (camera == null) {
             camera = Camera.open(cameraId.id)
             camera?.setUp()
@@ -49,26 +70,5 @@ class CameraController1() : CameraController() {
 
     override fun reconnect() {
         camera?.reconnect()
-    }
-
-    private fun Camera.setUp() {
-        val preferredPreviewSize = parameters.getPreferredPreviewSize()
-        parameters.setPreviewSize(preferredPreviewSize.width, preferredPreviewSize.height)
-        if (parameters.supportedFlashModes != null) parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)
-        setDisplayOrientation(90)
-    }
-
-    private fun Camera.Parameters.getPreferredPreviewSize(): Camera.Size {
-        return supportedPreviewSizes.getPreferredSize()
-    }
-
-    private fun List<Camera.Size>.getPreferredSize(): Camera.Size {
-        val ratios = FloatArray(this.size)
-        for (i in this.indices) {
-            val width = this[i].width.toFloat()
-            val height = this[i].height.toFloat()
-            ratios[i] = if (width > height) width / height else height / width
-        }
-        return this[ratios.minElementIndex()!!]
     }
 }
