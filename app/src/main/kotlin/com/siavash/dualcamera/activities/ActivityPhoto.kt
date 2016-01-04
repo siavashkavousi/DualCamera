@@ -62,7 +62,7 @@ class ActivityPhoto : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 fragmentManager.addFragment(R.id.container, fragmentPhoto as FragmentPhoto, fragmentId.name)
             }
         } else if (fragmentId == FragmentId.SHARE) {
-            fragmentPhoto?.saveBitmapHidden(finalImagePath)
+            fragmentPhoto?.saveBitmap(finalImagePath)
             fragmentManager.addFragment(R.id.container, FragmentShare(), FragmentId.SHARE.name)
         }
     }

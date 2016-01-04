@@ -104,10 +104,10 @@ fun getOutputMediaFilePath(): String {
     return getExternalApplicationStorage() + File.separator + "IMG_$timeStamp.jpg"
 }
 
-fun View.saveBitmap(file: File): String {
+fun View.saveAsBitmap(file: File): String? {
     this.isDrawingCacheEnabled = true
     val bitmap = this.drawingCache
-    val imageUrl = bitmap.encodeBitmap(file)
+    val imageUrl = bitmap?.encodeBitmap(file)
     this.isDrawingCacheEnabled = false
     return imageUrl
 }
