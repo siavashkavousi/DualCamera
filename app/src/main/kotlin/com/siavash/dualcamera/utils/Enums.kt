@@ -26,7 +26,7 @@ enum class Font(val resourceId: String) {
 }
 
 enum class FontSize(size: Float) {
-    SMALL (18f), MEDIUM (20f), LARGE (22f), X_LARGE (25f), XX_LARGE (28f)
+    SMALL(18f), MEDIUM(20f), LARGE(22f), X_LARGE(25f), XX_LARGE(28f)
 }
 
 enum class Swipe() {

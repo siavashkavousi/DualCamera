@@ -4,10 +4,10 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.SurfaceView
 import android.widget.ImageButton
+import bindView
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.control.Preview
 import com.siavash.dualcamera.utils.CameraId
-import com.siavash.dualcamera.utils.bindView
 import com.siavash.dualcamera.utils.sendIntentForCommentInCafeBazaar
 import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx

@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import bindView
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.FragmentPhoto
 import com.siavash.dualcamera.fragments.OnTransformationTypeListener
 import com.siavash.dualcamera.utils.TransformationType
-import com.siavash.dualcamera.utils.bindView
 import com.siavash.dualcamera.utils.frontImagePath
 import com.siavash.dualcamera.utils.setImageWithTransformation
 import org.jetbrains.anko.onClick

@@ -7,11 +7,15 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
+import bindView
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.fragments.FragmentPhoto
 import com.siavash.dualcamera.fragments.FragmentShare
 import com.siavash.dualcamera.fragments.OnFragmentInteractionListener
-import com.siavash.dualcamera.utils.*
+import com.siavash.dualcamera.utils.FragmentId
+import com.siavash.dualcamera.utils.Toolbar
+import com.siavash.dualcamera.utils.addFragment
+import com.siavash.dualcamera.utils.finalImagePath
 import org.jetbrains.anko.intentFor
 
 /**

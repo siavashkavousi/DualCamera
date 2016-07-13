@@ -16,7 +16,10 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.siavash.dualcamera.R
 import com.siavash.dualcamera.activities.ActivityPhoto
-import com.siavash.dualcamera.utils.*
+import com.siavash.dualcamera.utils.Font
+import com.siavash.dualcamera.utils.finalImagePath
+import com.siavash.dualcamera.utils.getDisplaySize
+import com.siavash.dualcamera.utils.getFont
 import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx
 import java.io.File

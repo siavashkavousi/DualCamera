@@ -18,7 +18,6 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.siavash.dualcamera.ApplicationBase
 import com.siavash.dualcamera.R
-import com.siavash.dualcamera.utils.ResettableCountDownLatch
 import jp.wasabeef.glide.transformations.CropCircleTransformation
 import jp.wasabeef.glide.transformations.GrayscaleTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
